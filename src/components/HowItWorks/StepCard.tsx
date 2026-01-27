@@ -8,7 +8,7 @@ type StepCardProps = {
 
 export const StepCard = ({ number, title, description }: StepCardProps) => (
     <motion.div
-        className="glass flex w-72 flex-col items-center p-5 text-center"
+        className="flex w-full max-w-xs sm:max-w-sm lg:w-72 flex-col items-center p-5 text-center border border-white/20 shadow-lg"
         whileHover={{ scale: 1.03 }}
     >
         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-primary">

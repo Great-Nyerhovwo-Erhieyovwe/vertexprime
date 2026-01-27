@@ -4,6 +4,10 @@ import {
   FaRobot,
   FaMoneyBillWave,
   FaGlobeAmericas,
+  FaMobileAlt,
+  FaShieldAlt,
+  FaClock,
+  FaUsers,
 } from "react-icons/fa";
 import { FeatureCard } from "./FeatureCard";
 
@@ -11,39 +15,64 @@ const features = [
   {
     Icon: FaBolt,
     title: "Instant Trade Execution",
-    description: "Sub‑millisecond order routing for razor‑sharp pricing.",
+    description: "Sub‑millisecond order routing for razor‑sharp pricing and minimal slippage.",
   },
   {
     Icon: FaChartLine,
     title: "Advanced Trading Charts",
-    description: "Customizable indicators, multi‑timeframe views, and drawing tools.",
+    description: "Customizable indicators, multi‑timeframe views, drawing tools, and technical analysis.",
   },
   {
     Icon: FaRobot,
     title: "AI‑Powered Signals",
-    description: "Machine‑learning models suggest optimal entry/exit points.",
+    description: "Machine‑learning models suggest optimal entry/exit points based on market data.",
   },
   {
     Icon: FaMoneyBillWave,
     title: "Fast Deposits & Withdrawals",
-    description: "Support for fiat, crypto, and major e‑wallets.",
+    description: "Support for fiat currencies, cryptocurrencies, and major e-wallets with instant processing.",
   },
   {
     Icon: FaGlobeAmericas,
     title: "Multi‑Asset Trading",
-    description: "Forex, crypto, stocks, indices – all in one platform.",
+    description: "Trade forex, crypto, stocks, indices, commodities – all in one unified platform.",
+  },
+  {
+    Icon: FaMobileAlt,
+    title: "Mobile Trading App",
+    description: "Full-featured mobile app for trading on-the-go with all desktop features.",
+  },
+  {
+    Icon: FaShieldAlt,
+    title: "Bank-Level Security",
+    description: "Multi-layer security including 2FA, cold storage, and regulatory compliance.",
+  },
+  {
+    Icon: FaClock,
+    title: "24/7 Market Access",
+    description: "Round-the-clock trading with global market hours and instant liquidity.",
+  },
+  {
+    Icon: FaUsers,
+    title: "Expert Support Team",
+    description: "Dedicated account managers and technical support available 24/7.",
   },
 ];
 
 export const WhyChoose = () => (
-  <section className="py-12">
-    <h2 className="mb-8 text-center text-2xl font-semibold text-white">
-      Why Choose VertexPrime Capital?
-    </h2>
-    <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-6 px-4">
-      {features.map((f, i) => (
-        <FeatureCard key={i} {...f} />
-      ))}
+  <section className="py-16">
+    <div className="mx-auto max-w-7xl px-4">
+      <h2 className="mb-4 text-center text-3xl font-semibold text-white">
+        Why Choose VertexPrime Capital?
+      </h2>
+      <p className="mb-12 text-center text-white/70 max-w-3xl mx-auto">
+        Discover the advantages that make VertexPrime Capital the preferred choice for traders worldwide. Our platform combines cutting-edge technology with unparalleled service.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {features.map((f, i) => (
+          <FeatureCard key={i} {...f} />
+        ))}
+      </div>
     </div>
   </section>
 );

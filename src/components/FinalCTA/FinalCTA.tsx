@@ -1,34 +1,52 @@
 import { motion } from "framer-motion";
 
 export const FinalCTA = () => (
-    <section className="py-16">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
-            <h2 className="text-3xl font-bold text-white">
-                Ready to Trade with Confidence?
-            </h2>
-            <p className="text-lg text-white/80">
-                Join thousands of traders who trust VertexPrime for fast, secure, and
-                profitable trading.
-            </p>
+    <section className="py-20">
+        <div className="mx-auto max-w-6xl px-4">
+            <div className="text-center">
+                <h2 className="mb-6 text-4xl font-bold text-white">
+                    Ready to Trade with Confidence?
+                </h2>
+                <p className="mb-8 text-xl text-white/80 max-w-3xl mx-auto">
+                    Join thousands of traders who trust VertexPrime for fast, secure, and profitable trading. Start your journey today with our advanced platform.
+                </p>
 
-            <motion.div
-                className="flex gap-4"
-                whileHover={{ scale: 1.02 }}
-            >
-                <motion.button
-                    className="rounded-md bg-accent px-8 py-3 font-medium text-primary shadow-lg"
-                    whileHover={{ scale: 1.05 }}
-                >
-                    Start Trading
-                </motion.button>
+                <div className="mb-12 flex flex-col sm:flex-row justify-center gap-6">
+                    <motion.button
+                        className="rounded-lg bg-accent px-10 py-4 font-semibold text-primary shadow-lg hover:shadow-xl transition-shadow"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        Start Trading Now
+                    </motion.button>
 
-                <motion.button
-                    className="rounded-md border border-accent px-8 py-3 font-medium text-accent"
-                    whileHover={{ scale: 1.05 }}
-                >
-                    Create Free Account
-                </motion.button>
-            </motion.div>
+                    <motion.button
+                        className="rounded-lg border-2 border-accent px-10 py-4 font-semibold text-accent hover:bg-accent hover:text-primary transition-colors"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        Create Free Account
+                    </motion.button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div>
+                        <div className="text-3xl mb-2">🚀</div>
+                        <h3 className="text-lg font-semibold text-accent mb-1">Quick Setup</h3>
+                        <p className="text-white/70">Get started in under 5 minutes</p>
+                    </div>
+                    <div>
+                        <div className="text-3xl mb-2">💰</div>
+                        <h3 className="text-lg font-semibold text-accent mb-1">No Hidden Fees</h3>
+                        <p className="text-white/70">Transparent pricing, no surprises</p>
+                    </div>
+                    <div>
+                        <div className="text-3xl mb-2">🛡️</div>
+                        <h3 className="text-lg font-semibold text-accent mb-1">24/7 Support</h3>
+                        <p className="text-white/70">Always here when you need us</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 );

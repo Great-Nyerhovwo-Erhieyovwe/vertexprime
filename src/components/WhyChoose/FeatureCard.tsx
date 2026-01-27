@@ -9,7 +9,7 @@ type FeatureCardProps = {
 
 export const FeatureCard = ({ Icon, title, description }: FeatureCardProps) => (
   <motion.div
-    className="glass flex w-80 flex-col items-center p-6 text-center"
+    className="flex w-full max-w-xs sm:max-w-sm lg:w-80 flex-col items-center p-6 text-center border border-white/20 shadow-lg"
     whileHover={{ y: -5, scale: 1.02 }}
   >
     <Icon size={36} className="mb-4 text-accent" />

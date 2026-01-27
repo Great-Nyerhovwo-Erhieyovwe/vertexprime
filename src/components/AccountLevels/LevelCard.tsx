@@ -16,7 +16,7 @@ export const LevelCard = ({
     perks,
 }: LevelCardProps) => (
     <motion.div
-        className="glass flex w-72 flex-col p-5"
+        className="flex w-full max-w-xs sm:max-w-sm lg:w-72 flex-col p-5 border border-white/20 shadow-lg"
         whileHover={{ y: -5, scale: 1.02 }}
     >
         <h3 className="mb-2 text-center text-xl font-bold text-accent">{tier}</h3>

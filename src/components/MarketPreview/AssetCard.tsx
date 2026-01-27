@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createChart, LineStyle, ColorType, LineSeries } from "lightweight-charts";
+import type { UTCTimestamp } from "lightweight-charts";
 
 type AssetCardProps = {
   name: string;
@@ -35,7 +36,7 @@ export const AssetCard = ({
       lineWidth: 2,
       lineStyle: LineStyle.Solid,
     });
-    series.setData(data.map((v, i) => ({ time: i, value: v })));
+    series.setData(data.map((v, i) => ({ time: i as UTCTimestamp, value: v })));
 
     return () => chart.remove();
   }, [data]);
@@ -43,7 +44,7 @@ export const AssetCard = ({
   const changeColor = change >= 0 ? "text-green-400" : "text-red-400";
 
   return (
-    <div className="glass flex w-64 flex-col items-start p-3">
+    <div className="flex w-full max-w-xs sm:max-w-sm lg:w-64 flex-col items-start p-3 border border-white/20 shadow-lg">
       <div className="flex w-full justify-between text-sm text-white">
         <span>{name}</span>
         <span>{symbol}</span>

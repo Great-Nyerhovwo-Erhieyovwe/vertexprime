@@ -29,17 +29,42 @@ const mockAssets = [
     change: 0.09,
     data: [4190, 4195, 4200, 4210, 4215, 4210.5],
   },
+  {
+    name: "Gold",
+    symbol: "Commodities",
+    price: "$1,950.30",
+    change: 0.8,
+    data: [1940, 1945, 1950, 1955, 1950, 1950.3],
+  },
+  {
+    name: "ETH/USD",
+    symbol: "Crypto",
+    price: "$1,650",
+    change: 2.1,
+    data: [1620, 1630, 1640, 1650, 1645, 1650],
+  },
 ];
 
 export const MarketPreview = () => (
-  <section className="py-12">
-    <h2 className="mb-6 text-center text-2xl font-semibold text-white">
-      Market Overview
-    </h2>
-    <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-6 px-4">
-      {mockAssets.map((a, i) => (
-        <AssetCard key={i} {...a} />
-      ))}
+  <section className="py-16">
+    <div className="mx-auto max-w-7xl px-4">
+      <h2 className="mb-4 text-center text-3xl font-semibold text-white">
+        Live Market Overview
+      </h2>
+      <p className="mb-12 text-center text-white/70 max-w-2xl mx-auto">
+        Stay ahead of the market with real-time data across multiple asset classes. Our platform provides instant updates and advanced analytics.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {mockAssets.map((a, i) => (
+          <AssetCard key={i} {...a} />
+        ))}
+      </div>
+      <div className="mt-12 text-center">
+        <p className="text-white/60 mb-4">Want to see more markets?</p>
+        <button className="bg-accent text-primary px-6 py-3 rounded-lg font-medium hover:bg-accent/90 transition-colors">
+          View All Markets
+        </button>
+      </div>
     </div>
   </section>
 );

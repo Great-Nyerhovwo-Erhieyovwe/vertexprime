@@ -5,6 +5,7 @@ type Testimonial = {
     author: string;
     rating: number; // 1‑5
     comment: string;
+    role?: string;
 };
 
 const testimonials: Testimonial[] = [
@@ -12,19 +13,36 @@ const testimonials: Testimonial[] = [
         author: "Alex M.",
         rating: 5,
         comment:
-            "VertexPrime’s execution speed is unmatched. I’ve never seen slippage this low.",
+            "VertexPrime’s execution speed is unmatched. I’ve never seen slippage this low. The platform handles high-volume trading effortlessly.",
+        role: "Professional Trader",
     },
     {
         author: "Sofia R.",
         rating: 4,
         comment:
-            "The AI‑signals helped me catch trends early. The UI feels premium and fast.",
+            "The AI‑signals helped me catch trends early. The UI feels premium and fast. Customer support is always available when needed.",
+        role: "Day Trader",
     },
     {
         author: "Liam K.",
         rating: 5,
         comment:
-            "Customer support resolved my KYC issue within minutes. Highly recommended!",
+            "Customer support resolved my KYC issue within minutes. Highly recommended! The mobile app is just as powerful as the desktop version.",
+        role: "Crypto Investor",
+    },
+    {
+        author: "Maria G.",
+        rating: 5,
+        comment:
+            "I've been trading for 10 years, and VertexPrime offers the best combination of tools and reliability. Their educational resources are excellent.",
+        role: "Experienced Trader",
+    },
+    {
+        author: "David L.",
+        rating: 4,
+        comment:
+            "The zero-commission pairs on Gold tier saved me thousands. The platform is intuitive and the charts are top-notch.",
+        role: "Forex Trader",
     },
 ];
 
@@ -70,10 +88,14 @@ export const Testimonials = () => {
     ));
 
     return (
-        <section className="py-12">
-            <h2 className="mb-8 text-center text-2xl font-semibold text-white">
-                What Our Traders Say
-            </h2>
+        <section className="py-16">
+            <div className="mx-auto max-w-7xl px-4">
+                <h2 className="mb-4 text-center text-3xl font-semibold text-white">
+                    What Our Traders Say
+                </h2>
+                <p className="mb-12 text-center text-white/70 max-w-2xl mx-auto">
+                    Don't just take our word for it. Hear from traders who have experienced success with VertexPrime Capital.
+                </p>
 
             <div className="relative mx-auto flex max-w-xl items-center justify-center">
                 <button
@@ -92,7 +114,7 @@ export const Testimonials = () => {
                         animate="center"
                         exit="exit"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="glass w-full p-6 text-center"
+                        className="w-full p-6 text-center border border-white/20 shadow-lg"
                     >
                         <div className="mb-4 flex justify-center">{stars}</div>
                         <p className="mb-4 text-lg italic text-white/90">
@@ -108,6 +130,7 @@ export const Testimonials = () => {
                 >
                     ›
                 </button>
+                </div>
             </div>
         </section>
     );
