@@ -1,8 +1,35 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Function to check if a link is active
+    const isActiveLink = (path: string) => {
+        if (path === '/' && location.pathname === '/') {
+            return true;
+        }
+        if (path !== '/' && location.pathname.startsWith(path)) {
+            return true;
+        }
+        return false;
+    };
+
+    // Function to get link styles based on active state
+    const getLinkStyles = (path: string, isMobile: boolean = false) => {
+        const baseStyles = isMobile
+            ? "block px-3 py-2 rounded-md text-base font-medium transition-all duration-300"
+            : "px-3 py-2 rounded-md text-sm font-medium transition-all duration-300";
+
+        const activeStyles = isActiveLink(path)
+            ? "text-accent bg-accent/10 border-b-2 border-accent"
+            : "text-white hover:text-accent hover:bg-white/5";
+
+        return `${baseStyles} ${activeStyles}`;
+    };
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-md border-b border-white/10">
@@ -19,21 +46,46 @@ export const Navbar = () => {
                     {/* Desktop Menu */}
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-4">
-                            <a href="#home" className="text-white hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <motion.a
+                                href="/"
+                                className={getLinkStyles('/')}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
                                 Home
-                            </a>
-                            <a href="#markets" className="text-white hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            </motion.a>
+                            <motion.a
+                                href="/markets"
+                                className={getLinkStyles('/markets')}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
                                 Markets
-                            </a>
-                            <a href="#platform" className="text-white hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            </motion.a>
+                            <motion.a
+                                href="/platform"
+                                className={getLinkStyles('/platform')}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
                                 Platform
-                            </a>
-                            <a href="#about" className="text-white hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            </motion.a>
+                            <motion.a
+                                href="/about"
+                                className={getLinkStyles('/about')}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
                                 About
-                            </a>
-                            <a href="#contact" className="text-white hover:text-accent px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            </motion.a>
+                            <motion.a
+                                href="/contact"
+                                className={getLinkStyles('/contact')}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
                                 Contact
-                            </a>
+                            </motion.a>
                         </div>
                     </div>
 
@@ -43,6 +95,7 @@ export const Navbar = () => {
                             className="bg-accent text-primary px-4 py-2 rounded-md font-medium hover:bg-accent/90 transition-colors"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate('/login')}
                         >
                             Sign In
                         </motion.button>
@@ -74,24 +127,63 @@ export const Navbar = () => {
                         exit={{ opacity: 0, height: 0 }}
                     >
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-primary/95">
-                            <a href="#home" className="text-white hover:text-accent block px-3 py-2 rounded-md text-base font-medium">
+                            <motion.a
+                                href="/"
+                                className={getLinkStyles('/', true)}
+                                onClick={() => setIsOpen(false)}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
                                 Home
-                            </a>
-                            <a href="#markets" className="text-white hover:text-accent block px-3 py-2 rounded-md text-base font-medium">
+                            </motion.a>
+                            <motion.a
+                                href="/markets"
+                                className={getLinkStyles('/markets', true)}
+                                onClick={() => setIsOpen(false)}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
                                 Markets
-                            </a>
-                            <a href="#platform" className="text-white hover:text-accent block px-3 py-2 rounded-md text-base font-medium">
+                            </motion.a>
+                            <motion.a
+                                href="/platform"
+                                className={getLinkStyles('/platform', true)}
+                                onClick={() => setIsOpen(false)}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
                                 Platform
-                            </a>
-                            <a href="#about" className="text-white hover:text-accent block px-3 py-2 rounded-md text-base font-medium">
+                            </motion.a>
+                            <motion.a
+                                href="/about"
+                                className={getLinkStyles('/about', true)}
+                                onClick={() => setIsOpen(false)}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
                                 About
-                            </a>
-                            <a href="#contact" className="text-white hover:text-accent block px-3 py-2 rounded-md text-base font-medium">
+                            </motion.a>
+                            <motion.a
+                                href="/contact"
+                                className={getLinkStyles('/contact', true)}
+                                onClick={() => setIsOpen(false)}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
                                 Contact
-                            </a>
-                            <button className="bg-accent text-primary w-full px-3 py-2 rounded-md font-medium mt-4">
+                            </motion.a>
+
+                            <motion.button
+                                className="bg-accent text-primary w-full px-3 py-2 rounded-md font-medium mt-4"
+                                onClick={() => {
+                                    navigate('/login');
+                                    setIsOpen(false);
+                                }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
                                 Sign In
-                            </button>
+                            </motion.button>
                         </div>
                     </motion.div>
                 )}

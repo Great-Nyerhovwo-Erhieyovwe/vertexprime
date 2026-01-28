@@ -1,40 +1,63 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, animate } from "framer-motion";
 import { FaUsers, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";
 import { heroCounters } from "../../utils/mockData";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-const Counter = ({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) => (
-    <motion.div
-        className="text-center text-white"
-        whileHover={{ scale: 1.05 }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.5 }}
-    >
-        <motion.div 
-            className="text-4xl sm:text-5xl mb-2 text-accent"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 1.2, type: "spring", stiffness: 200 }}
+const Counter = ({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) => {
+    const [displayValue, setDisplayValue] = useState(0);
+    const count = useMotionValue(0);
+
+    useEffect(() => {
+        const controls = animate(count, value, {
+            duration: 2,
+            ease: "easeOut",
+            onUpdate: (latest) => setDisplayValue(Math.round(latest))
+        });
+
+        return controls.stop;
+    }, [count, value]);
+
+    return (
+        <motion.div
+            className="text-center text-white flex-1 min-w-0"
+            whileHover={{ scale: 1.05 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.5 }}
         >
-            {icon}
+            <motion.div
+                className="text-3xl sm:text-4xl lg:text-5xl mb-2 text-accent flex justify-center"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1.2, type: "spring", stiffness: 200 }}
+            >
+                {icon}
+            </motion.div>
+            <motion.div
+                className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1.4, type: "spring", stiffness: 200 }}
+            >
+                {value >= 1000000 ? `${(displayValue / 1000000).toFixed(1)}M` :
+                 value >= 1000 ? `${(displayValue / 1000).toFixed(0)}K` :
+                 displayValue.toLocaleString()}
+            </motion.div>
+            <div className="text-xs sm:text-sm lg:text-base opacity-80 px-2">{label}</div>
         </motion.div>
-        <motion.div 
-            className="text-4xl sm:text-5xl font-bold mb-2"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 1.4, type: "spring", stiffness: 200 }}
-        >
-            {value.toLocaleString()}
-        </motion.div>
-        <div className="text-sm sm:text-base opacity-80">{label}</div>
-    </motion.div>
-);
+    );
+};
 
 export const Hero = () => {
+
+
+    const navigate = useNavigate();
+
     return (
         <section className="relative flex min-h-screen w-full items-center justify-center py-20">
             {/* Forex background image */}
-            <div 
+            <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                 style={{
                     backgroundImage: `url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
@@ -43,7 +66,7 @@ export const Hero = () => {
             />
             {/* Dark neon blue overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0f33]/90 via-[#0d1425]/85 to-[#0a0f33]/90" />
-            
+
             {/* Floating elements for depth */}
             <div className="absolute top-20 left-10 w-32 h-32 bg-accent/10 rounded-full blur-xl" />
             <div className="absolute bottom-20 right-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl" />
@@ -81,8 +104,9 @@ export const Hero = () => {
                         className="group relative rounded-xl bg-gradient-to-r from-accent to-blue-500 px-6 sm:px-8 py-3 sm:py-4 font-bold text-white text-base sm:text-lg shadow-2xl hover:shadow-accent/25 transition-all duration-300 overflow-hidden"
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate("/login")}
                     >
-                        <span className="relative z-10">Start Trading Now</span>
+                        <span className="relative z-10"> Start Trading Now</span>
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </motion.button>
 
@@ -107,7 +131,7 @@ export const Hero = () => {
                         whileHover={{ scale: 1.05, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                     >
-                        <motion.div 
+                        <motion.div
                             className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300"
                             animate={{ rotate: [0, 5, -5, 0] }}
                             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
@@ -122,7 +146,7 @@ export const Hero = () => {
                         whileHover={{ scale: 1.05, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                     >
-                        <motion.div 
+                        <motion.div
                             className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300"
                             animate={{ scale: [1, 1.1, 1] }}
                             transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
@@ -137,7 +161,7 @@ export const Hero = () => {
                         whileHover={{ scale: 1.05, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                     >
-                        <motion.div 
+                        <motion.div
                             className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300"
                             animate={{ y: [0, -3, 0] }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -151,7 +175,7 @@ export const Hero = () => {
 
                 {/* Animated counters with enhanced styling */}
                 <motion.div
-                    className="flex flex-col sm:flex-row justify-center gap-8 sm:gap-12 lg:gap-16"
+                    className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-8 lg:gap-12 xl:gap-16 w-full max-w-4xl mx-auto"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8 }}

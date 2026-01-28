@@ -3,7 +3,7 @@ import { LevelCard } from "./LevelCard";
 const tiers = [
     {
         tier: "Basic",
-        minDeposit: "$100",
+        minDeposit: "$200",
         withdrawLimit: "$5,000/day",
         bonus: "5% welcome",
         perks: ["Standard spreads", "Basic support", "Mobile app access"],

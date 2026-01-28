@@ -22,10 +22,10 @@ export const Footer = () => (
                 <div>
                     <h4 className="mb-4 text-lg font-semibold">Quick Links</h4>
                     <ul className="space-y-2 text-sm">
-                        <li><a href="#about" className="text-white/70 hover:text-accent transition-colors">About Us</a></li>
-                        <li><a href="#markets" className="text-white/70 hover:text-accent transition-colors">Markets</a></li>
-                        <li><a href="#platform" className="text-white/70 hover:text-accent transition-colors">Platform</a></li>
-                        <li><a href="#support" className="text-white/70 hover:text-accent transition-colors">Support</a></li>
+                        <li><a href="/about" className="text-white/70 hover:text-accent transition-colors">About Us</a></li>
+                        <li><a href="/markets" className="text-white/70 hover:text-accent transition-colors">Markets</a></li>
+                        <li><a href="/platform" className="text-white/70 hover:text-accent transition-colors">Platform</a></li>
+                        <li><a href="/support" className="text-white/70 hover:text-accent transition-colors">Support</a></li>
                     </ul>
                 </div>
 
