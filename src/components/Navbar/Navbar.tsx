@@ -183,7 +183,21 @@ export const Navbar = () => {
                                 whileTap={{ scale: 0.98 }}
                             >
                                 Sign In
+                                {/* Login */}
                             </motion.button>
+
+                            {/* Might Add later if needed */}
+                            {/* <motion.button
+                                className="bg-accent text-primary w-full px-3 py-2 rounded-md font-medium mt-4"
+                                onClick={() => {
+                                    navigate('/signup');
+                                    setIsOpen(false);
+                                }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                Signup
+                            </motion.button> */}
                         </div>
                     </motion.div>
                 )}

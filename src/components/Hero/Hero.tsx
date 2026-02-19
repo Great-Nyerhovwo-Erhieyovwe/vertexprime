@@ -10,7 +10,7 @@ const Counter = ({ label, value, icon }: { label: string; value: number; icon: R
 
     useEffect(() => {
         const controls = animate(count, value, {
-            duration: 2,
+            duration: 8,
             ease: "easeOut",
             onUpdate: (latest) => setDisplayValue(Math.round(latest))
         });
@@ -151,6 +151,7 @@ export const Hero = () => {
                             animate={{ scale: [1, 1.1, 1] }}
                             transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
                         >
+                            {/* <FaLock/> */}
                             🔒
                         </motion.div>
                         <h3 className="text-xl font-bold text-accent mb-3">Secure Funds</h3>
@@ -166,6 +167,7 @@ export const Hero = () => {
                             animate={{ y: [0, -3, 0] }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         >
+                            {/* <FaChart/> */}
                             📊
                         </motion.div>
                         <h3 className="text-xl font-bold text-accent mb-3">Pro Tools</h3>
@@ -175,7 +177,7 @@ export const Hero = () => {
 
                 {/* Animated counters with enhanced styling */}
                 <motion.div
-                    className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-8 lg:gap-12 xl:gap-16 w-full max-w-4xl mx-auto"
+                    className="flex flex-row sm:flex-row justify-center items-center gap-6 sm:gap-8 lg:gap-12 xl:gap-16 w-full max-w-4xl mx-auto"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8 }}

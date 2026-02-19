@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
    AdminLogin – behaves like the normal login but enforces the admin
    role after the JWT is obtained.
    ----------------------------------------------------------------- */
+
 export default function AdminLogin() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -51,6 +52,7 @@ export default function AdminLogin() {
         setServerError(
           "Your account does not have admin privileges. Please use the regular login."
         );
+        navigate('/login');
         return;
       }
 
@@ -115,7 +117,7 @@ export default function AdminLogin() {
         <p className="mt-6 text-center text-sm text-white/80">
           Not an admin?{" "}
           <Link to="/login" className="hover:text-accent">
-            Use the regular user login
+            Login as user...
           </Link>
         </p>
       </div>

@@ -5,14 +5,10 @@ import About from "./pages/Home/About/AboutUs";
 import Markets from "./pages/Home/Market/Market";
 import Platform from "./pages/Home/Platform/Platform";
 import Login from "./pages/auth/Login/Login";
+import Signup from "./pages/auth/Signup/Signup";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminHome from "./pages/admin/AdminHome";
-import UserList from "./pages/admin/Users/UserList";
-import UserCreate from "./pages/admin/Users/UserCreate";
-import UserEdit from "./pages/admin/Users/UserEdit";
-import UpgradeList from "./pages/admin/Upgrades/UpgradeList";
-import UpgradeEdit from "./pages/admin/Upgrades/UpgradeEdit";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminTransactions from "./pages/admin/AdminTransactions";
 
@@ -31,6 +27,7 @@ function App() {
       {/* Auth routes */}
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/admin/login" element={<AdminLogin />} />
       </Routes>
 
@@ -38,11 +35,6 @@ function App() {
       <Routes>
         <Route path="/admin" element={<AdminDashboard />}>
           <Route index element={<AdminHome />} />
-          <Route path="users" element={<UserList />} />
-          <Route path="users/create" element={<UserCreate />} />
-          <Route path="users/:id" element={<UserEdit />} />
-          <Route path="upgrades" element={<UpgradeList />} />
-          <Route path="upgrades/:id" element={<UpgradeEdit />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="transactions" element={<AdminTransactions />} />
         </Route>

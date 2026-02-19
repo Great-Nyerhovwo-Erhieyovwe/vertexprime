@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
+// import { useNavigate } from "react-router-dom";
 
 export const FinalCTA = () => (
+
+//   const navigate = useNavigate();
+
     <section className="py-20">
         <div className="mx-auto max-w-6xl px-4">
             <div className="text-center">
@@ -16,6 +20,7 @@ export const FinalCTA = () => (
                         className="rounded-lg bg-accent px-10 py-4 font-semibold text-primary shadow-lg hover:shadow-xl transition-shadow"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
+                        // onClick={() => navigate("/login")}
                     >
                         Start Trading Now
                     </motion.button>
