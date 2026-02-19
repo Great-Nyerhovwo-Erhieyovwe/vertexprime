@@ -88,13 +88,13 @@ const AboutUs = () => {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="relative py-20 px-4">
+            <section className="relative py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl text-center">
                     <motion.div {...fadeInUp}>
-                        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
                             About <span className="text-accent">VertexPrime</span>
                         </h1>
-                        <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                        <p className="text-sm sm:text-base md:text-lg text-white/80 max-w-3xl mx-auto leading-relaxed">
                             Pioneering the future of financial trading through innovation, security, and unparalleled user experience.
                         </p>
                     </motion.div>
@@ -102,14 +102,14 @@ const AboutUs = () => {
             </section>
 
             {/* Mission Section */}
-            <section className="py-20 px-4">
+            <section className="py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-8 sm:mb-12"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Our Mission</h2>
-                        <p className="text-lg text-white/80 max-w-4xl mx-auto leading-relaxed">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Our Mission</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-4xl mx-auto leading-relaxed">
                             At VertexPrime Capital, we believe that access to sophisticated trading tools should not be limited to institutional investors.
                             Our mission is to democratize advanced trading technology, providing retail traders with institutional-grade platforms,
                             cutting-edge analytics, and unparalleled support to help them achieve their financial goals.
@@ -119,14 +119,14 @@ const AboutUs = () => {
             </section>
 
             {/* Values Section */}
-            <section className="py-20 px-4 bg-slate-900/50">
+            <section className="py-8 sm:py-12 md:py-16 px-4 bg-slate-900/50">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
                         className="text-center mb-16"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Our Values</h2>
-                        <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Our Values</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-3xl mx-auto">
                             The principles that guide everything we do
                         </p>
                     </motion.div>
@@ -154,14 +154,14 @@ const AboutUs = () => {
             </section>
 
             {/* Team Section */}
-            <section className="py-20 px-4">
+            <section className="py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
                         className="text-center mb-16"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Meet Our Team</h2>
-                        <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Meet Our Team</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-3xl mx-auto">
                             Industry experts dedicated to your trading success
                         </p>
                     </motion.div>
@@ -194,46 +194,35 @@ const AboutUs = () => {
             </section>
 
             {/* Timeline Section */}
-            <section className="py-20 px-4 bg-slate-900/50">
+            <section className="py-8 sm:py-12 md:py-16 px-4 bg-slate-900/50">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-8 sm:mb-12"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Our Journey</h2>
-                        <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Our Journey</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-3xl mx-auto">
                             Milestones that shaped our path to becoming a leading trading platform
                         </p>
                     </motion.div>
 
-                    <div className="relative">
-                        {/* Timeline line */}
-                        <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-accent/30"></div>
-
-                        <motion.div
-                            className="space-y-12"
-                            variants={staggerContainer}
-                            initial="initial"
-                            animate="animate"
-                        >
-                            {milestones.map((milestone, index) => (
-                                <motion.div
-                                    key={index}
-                                    className={`flex items-center ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
-                                    variants={fadeInUp}
-                                >
-                                    <div className={`w-1/2 ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}>
-                                        <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 inline-block">
-                                            <div className="text-accent font-bold text-lg mb-2">{milestone.year}</div>
-                                            <p className="text-white/80">{milestone.event}</p>
-                                        </div>
+                    <motion.div className="grid grid-cols-1 gap-4 sm:gap-6" variants={staggerContainer} initial="initial" animate="animate">
+                        {milestones.map((milestone, index) => (
+                            <motion.div
+                                key={index}
+                                className="bg-slate-800/50 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-slate-700/50"
+                                variants={fadeInUp}
+                            >
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-accent flex items-center justify-center text-sm font-bold text-primary">{milestone.year}</div>
+                                    <div>
+                                        <div className="text-white font-semibold mb-1">{milestone.event}</div>
+                                        <p className="text-white/70 text-sm">{milestone.event}</p>
                                     </div>
-                                    <div className="w-4 h-4 bg-accent rounded-full border-4 border-slate-900 relative z-10"></div>
-                                    <div className="w-1/2"></div>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 </div>
             </section>
 
@@ -277,11 +266,11 @@ const AboutUs = () => {
             </section>
 
             {/* Contact CTA */}
-            <section className="py-20 px-4 bg-gradient-to-r from-accent/10 to-blue-500/10">
+            <section className="py-8 sm:py-12 md:py-16 px-4 bg-gradient-to-r from-accent/10 to-blue-500/10">
                 <div className="mx-auto max-w-4xl text-center">
                     <motion.div {...fadeInUp}>
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Start Your Journey?</h2>
-                        <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
+                        <p className="text-sm sm:text-base text-white/80 mb-6 max-w-2xl mx-auto">
                             Join thousands of successful traders who trust VertexPrime Capital with their financial future.
                         </p>
                         <motion.button

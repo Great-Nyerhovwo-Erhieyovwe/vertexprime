@@ -252,13 +252,13 @@ const Markets = () => {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="relative py-20 px-4">
+            <section className="relative py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl text-center">
                     <motion.div {...fadeInUp}>
-                        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
                             Live <span className="text-accent">Markets</span>
                         </h1>
-                        <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                        <p className="text-sm sm:text-base md:text-lg text-white/80 max-w-3xl mx-auto leading-relaxed">
                             Access real-time market data, advanced charts, and comprehensive analysis across all major asset classes.
                         </p>
                     </motion.div>
@@ -266,20 +266,20 @@ const Markets = () => {
             </section>
 
             {/* Market Overview */}
-            <section className="py-20 px-4">
+            <section className="py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-8 sm:mb-12"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Market Overview</h2>
-                        <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Market Overview</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-3xl mx-auto">
                             Real-time prices and performance across major asset classes
                         </p>
                     </motion.div>
 
                     <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8"
                         variants={staggerContainer}
                         initial="initial"
                         animate="animate"
@@ -287,7 +287,7 @@ const Markets = () => {
                         {marketOverview.map((asset, index) => (
                             <motion.div
                                 key={index}
-                                className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 hover:border-accent/50 transition-all duration-300 cursor-pointer"
+                                className="bg-slate-800/50 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-slate-700/50 hover:border-accent/50 transition-all duration-300 cursor-pointer"
                                 variants={fadeInUp}
                                 whileHover={{ y: -5 }}
                                 onClick={() => setSelectedAsset(asset.name)}
@@ -304,7 +304,7 @@ const Markets = () => {
                                         {asset.change > 0 ? '+' : ''}{asset.change.toFixed(2)}%
                                     </div>
                                 </div>
-                                <div className="text-2xl font-bold text-accent mb-2">{asset.price}</div>
+                                <div className="text-xl sm:text-2xl font-bold text-accent mb-2">{asset.price}</div>
                                 <AssetCard {...asset} />
                             </motion.div>
                         ))}

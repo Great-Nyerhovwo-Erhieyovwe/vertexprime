@@ -141,13 +141,13 @@ const Contact = () => {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="relative py-20 px-4">
+            <section className="relative py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl text-center">
                     <motion.div {...fadeInUp}>
-                        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
                             Contact <span className="text-accent">Us</span>
                         </h1>
-                        <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                        <p className="text-sm sm:text-base md:text-lg text-white/80 max-w-3xl mx-auto leading-relaxed">
                             Get in touch with our expert team. We're here to help you succeed in your trading journey.
                         </p>
                     </motion.div>
@@ -155,20 +155,20 @@ const Contact = () => {
             </section>
 
             {/* Contact Methods */}
-            <section className="py-20 px-4">
+            <section className="py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
                         className="text-center mb-16"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Get In Touch</h2>
-                        <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Get In Touch</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-3xl mx-auto">
                             Multiple ways to reach our support team. Choose the method that works best for you.
                         </p>
                     </motion.div>
 
                     <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
                         variants={staggerContainer}
                         initial="initial"
                         animate="animate"
@@ -192,7 +192,7 @@ const Contact = () => {
             </section>
 
             {/* Contact Form & Info */}
-            <section className="py-20 px-4 bg-slate-900/50">
+            <section className="py-8 sm:py-12 md:py-16 px-4 bg-slate-900/50">
                 <div className="mx-auto max-w-7xl">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         {/* Contact Form */}
@@ -331,14 +331,14 @@ const Contact = () => {
             </section>
 
             {/* Office Locations */}
-            <section className="py-20 px-4">
+            <section className="py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
                         className="text-center mb-16"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Our Offices</h2>
-                        <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Our Offices</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-3xl mx-auto">
                             Global presence with local support in key financial hubs worldwide
                         </p>
                     </motion.div>
@@ -381,14 +381,14 @@ const Contact = () => {
             </section>
 
             {/* FAQ Section */}
-            <section className="py-20 px-4 bg-slate-900/50">
+            <section className="py-8 sm:py-12 md:py-16 px-4 bg-slate-900/50">
                 <div className="mx-auto max-w-4xl">
                     <motion.div
                         className="text-center mb-16"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Frequently Asked Questions</h2>
-                        <p className="text-lg text-white/80">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+                        <p className="text-sm sm:text-base text-white/80">
                             Quick answers to common questions about our services
                         </p>
                     </motion.div>
@@ -414,12 +414,12 @@ const Contact = () => {
             </section>
 
             {/* Support CTA */}
-            <section className="py-20 px-4 bg-gradient-to-r from-accent/10 to-blue-500/10">
+            <section className="py-8 sm:py-12 md:py-16 px-4 bg-gradient-to-r from-accent/10 to-blue-500/10">
                 <div className="mx-auto max-w-4xl text-center">
                     <motion.div {...fadeInUp}>
-                        <FaHeadset className="text-5xl text-accent mx-auto mb-6" />
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Need Immediate Help?</h2>
-                        <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+                        <FaHeadset className="text-4xl sm:text-5xl text-accent mx-auto mb-4" />
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Need Immediate Help?</h2>
+                        <p className="text-sm sm:text-base text-white/80 mb-6 max-w-2xl mx-auto">
                             Our expert support team is available 24/7 to assist you with any questions or concerns.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">

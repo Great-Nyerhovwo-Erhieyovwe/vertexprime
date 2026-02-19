@@ -34,15 +34,15 @@ const steps = [
 ];
 
 export const HowItWorks = () => (
-    <section className="py-16">
-        <div className="mx-auto max-w-7xl px-4">
-            <h2 className="mb-4 text-center text-3xl font-semibold text-white">
+    <section className="py-8 sm:py-12 md:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+            <h2 className="mb-3 sm:mb-4 md:mb-6 text-center text-2xl sm:text-3xl md:text-4xl font-semibold text-white">
                 How It Works
             </h2>
-            <p className="mb-12 text-center text-white/70 max-w-2xl mx-auto">
+            <p className="mb-8 sm:mb-10 md:mb-12 text-center text-sm sm:text-base text-white/70 max-w-2xl mx-auto leading-relaxed px-2">
                 Getting started with VertexPrime Capital is simple and secure. Follow these steps to begin your trading journey.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                 {steps.map((s) => (
                     <StepCard key={s.number} {...s} />
                 ))}

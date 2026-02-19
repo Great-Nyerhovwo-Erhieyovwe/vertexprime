@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLoading3Quarters, AiOutlineCheckCircle } from 'react-icons/ai'
 import { HiXMark } from 'react-icons/hi2'
-import { Footer } from '../../../components/Footer/Footer'
+// import { Footer } from '../../../components/Footer/Footer'
 
 const Signup = () => {
     // Form states
@@ -136,17 +136,25 @@ const Signup = () => {
         setIsLoading(true)
 
         try {
-            // Simulate API call to send OTP
+            // Send OTP to backend
             const response = await fetch('http://localhost:4000/api/auth/send-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email }),
             })
 
+            const data = await response.json()
+
             if (response.ok) {
+                // Store dev OTP if provided (for testing in development)
+                if (data.devOtp) {
+                    console.log(`📧 [DEV] OTP: ${data.devOtp}`)
+                    // Auto-fill OTP for testing (comment out in production)
+                    setOtp(data.devOtp)
+                }
                 setShowOtpModal(true)
             } else {
-                setFailureMessage('Failed to send OTP. Please try again.')
+                setFailureMessage(data.message || 'Failed to send OTP. Please try again.')
                 setShowFailureModal(true)
             }
         } catch (error) {
@@ -177,6 +185,8 @@ const Signup = () => {
                 }),
             })
 
+            const data = await response.json()
+
             if (response.ok) {
                 setShowOtpModal(false)
                 setShowSuccessModal(true)
@@ -201,7 +211,7 @@ const Signup = () => {
                     setOtp('')
                 }, 4000)
             } else {
-                setErrors({ otp: 'Invalid OTP. Please try again.' })
+                setErrors({ otp: data.message || 'Invalid OTP. Please try again.' })
             }
         } catch (error) {
             console.error('Error:', error)
@@ -882,7 +892,7 @@ const Signup = () => {
             )}
 
             {/* Footer */}
-            <Footer />
+            // <Footer />
         </div>
     )
 }

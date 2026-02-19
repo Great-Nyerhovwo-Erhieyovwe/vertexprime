@@ -74,7 +74,7 @@ export const Hero = () => {
 
             {/* Glass container with enhanced styling */}
             <motion.div
-                className="relative z-10 mx-4 max-w-6xl p-12 text-center"
+                className="relative z-10 mx-4 sm:mx-6 md:mx-4 max-w-6xl px-4 sm:px-6 md:px-12 py-8 sm:py-12 md:py-12 text-center"
                 initial={{ opacity: 0, y: -30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, ease: "easeOut" }}
@@ -84,34 +84,34 @@ export const Hero = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2, duration: 0.8 }}
                 >
-                    <h1 className="mb-8 text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white md:text-7xl leading-tight bg-gradient-to-r from-white via-accent to-blue-200 bg-clip-text text-transparent">
+                    <h1 className="mb-6 sm:mb-8 text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white leading-tight bg-gradient-to-r from-white via-accent to-blue-200 bg-clip-text text-transparent">
                         Trade Smarter with VertexPrime Capital
                     </h1>
 
-                    <p className="mb-12 text-lg sm:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed font-light px-4 sm:px-0">
+                    <p className="mb-8 sm:mb-12 text-base sm:text-lg md:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed font-light px-2 sm:px-0">
                         Experience lightning-fast execution, bank-level security, and cutting-edge trading tools designed for professionals and beginners alike. Join thousands of traders who trust VertexPrime for their financial success.
                     </p>
                 </motion.div>
 
                 {/* CTA Buttons with enhanced styling */}
                 <motion.div
-                    className="mb-16 flex flex-col sm:flex-row justify-center gap-4 sm:gap-6"
+                    className="mb-12 sm:mb-16 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 md:gap-6 px-2 sm:px-0"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.8 }}
                 >
                     <motion.button
-                        className="group relative rounded-xl bg-gradient-to-r from-accent to-blue-500 px-6 sm:px-8 py-3 sm:py-4 font-bold text-white text-base sm:text-lg shadow-2xl hover:shadow-accent/25 transition-all duration-300 overflow-hidden"
+                        className="group relative rounded-xl bg-gradient-to-r from-accent to-blue-500 px-6 sm:px-8 py-2.5 sm:py-3 md:py-4 font-bold text-white text-sm sm:text-base md:text-lg shadow-2xl hover:shadow-accent/25 transition-all duration-300 overflow-hidden"
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => navigate("/login")}
                     >
-                        <span className="relative z-10"> Start Trading Now</span>
+                        <span className="relative z-10">Start Trading Now</span>
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </motion.button>
 
                     <motion.button
-                        className="rounded-xl border-2 border-white/30 px-6 sm:px-8 py-3 sm:py-4 font-bold text-white text-base sm:text-lg backdrop-blur-sm hover:bg-white/10 hover:border-white/50 transition-all duration-300"
+                        className="rounded-xl border-2 border-white/30 px-6 sm:px-8 py-2.5 sm:py-3 md:py-4 font-bold text-white text-sm sm:text-base md:text-lg backdrop-blur-sm hover:bg-white/10 hover:border-white/50 transition-all duration-300"
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -121,63 +121,63 @@ export const Hero = () => {
 
                 {/* Key Features with enhanced animations */}
                 <motion.div
-                    className="mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10"
+                    className="mb-12 sm:mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6, duration: 0.8 }}
                 >
                     <motion.div
-                        className="text-center group"
+                        className="text-center group px-4 sm:px-2"
                         whileHover={{ scale: 1.05, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                     >
                         <motion.div
-                            className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300"
+                            className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300"
                             animate={{ rotate: [0, 5, -5, 0] }}
                             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                         >
                             ⚡
                         </motion.div>
-                        <h3 className="text-xl font-bold text-accent mb-3">Fast Execution</h3>
-                        <p className="text-white/80 leading-relaxed">Execute trades in milliseconds with our advanced infrastructure and zero-latency technology.</p>
+                        <h3 className="text-lg sm:text-xl font-bold text-accent mb-2 sm:mb-3">Fast Execution</h3>
+                        <p className="text-sm sm:text-base text-white/80 leading-relaxed">Execute trades in milliseconds with our advanced infrastructure and zero-latency technology.</p>
                     </motion.div>
                     <motion.div
-                        className="text-center group"
+                        className="text-center group px-4 sm:px-2"
                         whileHover={{ scale: 1.05, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                     >
                         <motion.div
-                            className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300"
+                            className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300"
                             animate={{ scale: [1, 1.1, 1] }}
                             transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
                         >
                             {/* <FaLock/> */}
                             🔒
                         </motion.div>
-                        <h3 className="text-xl font-bold text-accent mb-3">Secure Funds</h3>
-                        <p className="text-white/80 leading-relaxed">Your assets are protected with military-grade encryption and fully segregated accounts.</p>
+                        <h3 className="text-lg sm:text-xl font-bold text-accent mb-2 sm:mb-3">Secure Funds</h3>
+                        <p className="text-sm sm:text-base text-white/80 leading-relaxed">Your assets are protected with military-grade encryption and fully segregated accounts.</p>
                     </motion.div>
                     <motion.div
-                        className="text-center group"
+                        className="text-center group px-4 sm:px-2"
                         whileHover={{ scale: 1.05, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                     >
                         <motion.div
-                            className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300"
+                            className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300"
                             animate={{ y: [0, -3, 0] }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         >
                             {/* <FaChart/> */}
                             📊
                         </motion.div>
-                        <h3 className="text-xl font-bold text-accent mb-3">Pro Tools</h3>
-                        <p className="text-white/80 leading-relaxed">Access advanced charting, real-time data, and AI-powered analysis tools.</p>
+                        <h3 className="text-lg sm:text-xl font-bold text-accent mb-2 sm:mb-3">Pro Tools</h3>
+                        <p className="text-sm sm:text-base text-white/80 leading-relaxed">Access advanced charting, real-time data, and AI-powered analysis tools.</p>
                     </motion.div>
                 </motion.div>
 
                 {/* Animated counters with enhanced styling */}
                 <motion.div
-                    className="flex flex-row sm:flex-row justify-center items-center gap-6 sm:gap-8 lg:gap-12 xl:gap-16 w-full max-w-4xl mx-auto"
+                    className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-12 xl:gap-16 w-full max-w-4xl mx-auto px-2"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8 }}

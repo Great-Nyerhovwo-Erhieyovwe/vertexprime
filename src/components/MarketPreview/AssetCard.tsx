@@ -44,17 +44,17 @@ export const AssetCard = ({
   const changeColor = change >= 0 ? "text-green-400" : "text-red-400";
 
   return (
-    <div className="flex w-full max-w-xs sm:max-w-sm lg:w-64 flex-col items-start p-3 border border-white/20 shadow-lg">
-      <div className="flex w-full justify-between text-sm text-white">
-        <span>{name}</span>
-        <span>{symbol}</span>
+    <div className="flex w-full flex-col items-start p-3 sm:p-4 border border-white/20 shadow-lg rounded-lg hover:bg-white/5 transition-colors">
+      <div className="flex w-full justify-between text-xs sm:text-sm text-white">
+        <span className="font-medium">{name}</span>
+        <span className="text-white/60">{symbol}</span>
       </div>
-      <div className="mt-1 text-lg font-medium text-accent">{price}</div>
-      <div className={`mt-1 text-xs ${changeColor}`}>
+      <div className="mt-2 text-base sm:text-lg font-medium text-accent">{price}</div>
+      <div className={`mt-1 text-xs sm:text-sm ${changeColor}`}>
         {change > 0 ? "+" : ""}
         {change.toFixed(2)}%
       </div>
-      <div ref={chartContainer} className="mt-2 w-full" />
+      <div ref={chartContainer} className="mt-3 w-full" />
     </div>
   );
 };

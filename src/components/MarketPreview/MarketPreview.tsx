@@ -46,22 +46,22 @@ const mockAssets = [
 ];
 
 export const MarketPreview = () => (
-  <section className="py-16">
-    <div className="mx-auto max-w-7xl px-4">
-      <h2 className="mb-4 text-center text-3xl font-semibold text-white">
+  <section className="py-8 sm:py-12 md:py-16">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+      <h2 className="mb-3 sm:mb-4 md:mb-6 text-center text-2xl sm:text-3xl md:text-4xl font-semibold text-white">
         Live Market Overview
       </h2>
-      <p className="mb-12 text-center text-white/70 max-w-2xl mx-auto">
+      <p className="mb-8 sm:mb-10 md:mb-12 text-center text-sm sm:text-base text-white/70 max-w-2xl mx-auto leading-relaxed px-2">
         Stay ahead of the market with real-time data across multiple asset classes. Our platform provides instant updates and advanced analytics.
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {mockAssets.map((a, i) => (
           <AssetCard key={i} {...a} />
         ))}
       </div>
-      <div className="mt-12 text-center">
-        <p className="text-white/60 mb-4">Want to see more markets?</p>
-        <button className="bg-accent text-primary px-6 py-3 rounded-lg font-medium hover:bg-accent/90 transition-colors">
+      <div className="mt-8 sm:mt-10 md:mt-12 text-center">
+        <p className="text-white/60 mb-3 sm:mb-4 text-sm sm:text-base">Want to see more markets?</p>
+        <button className="bg-accent text-primary px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base">
           View All Markets
         </button>
       </div>

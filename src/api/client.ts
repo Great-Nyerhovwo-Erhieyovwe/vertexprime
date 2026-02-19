@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:4000";
+// Read API base URL from env, default to localhost:4000 for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -21,7 +22,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      window.location.href = "/";
     }
     return Promise.reject(error);
   }

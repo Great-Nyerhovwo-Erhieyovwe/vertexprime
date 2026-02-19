@@ -139,13 +139,13 @@ const Platform = () => {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="relative py-20 px-4">
+            <section className="relative py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl text-center">
                     <motion.div {...fadeInUp}>
-                        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
                             Advanced <span className="text-accent">Trading</span> Platform
                         </h1>
-                        <p className="text-xl md:text-2xl text-white/80 max-w-4xl mx-auto leading-relaxed">
+                        <p className="text-sm sm:text-base md:text-lg text-white/80 max-w-4xl mx-auto leading-relaxed">
                             Experience institutional-grade trading technology with lightning-fast execution,
                             advanced analytics, and seamless integration with global markets.
                         </p>
@@ -154,20 +154,20 @@ const Platform = () => {
             </section>
 
             {/* Platform Features */}
-            <section className="py-20 px-4">
+            <section className="py-8 sm:py-12 md:py-16 px-4">
                 <div className="mx-auto max-w-7xl">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-8 sm:mb-12"
                         {...fadeInUp}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Platform Features</h2>
-                        <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Platform Features</h2>
+                        <p className="text-sm sm:text-base text-white/80 max-w-3xl mx-auto">
                             Cutting-edge technology designed for modern traders
                         </p>
                     </motion.div>
 
                     <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
                         variants={staggerContainer}
                         initial="initial"
                         animate="animate"
@@ -175,13 +175,13 @@ const Platform = () => {
                         {platformFeatures.map((feature, index) => (
                             <motion.div
                                 key={index}
-                                className="bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl border border-slate-700/50 hover:border-accent/50 transition-all duration-300"
+                                className="bg-slate-800/50 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-slate-700/50 hover:border-accent/50 transition-all duration-300"
                                 variants={fadeInUp}
                                 whileHover={{ y: -5 }}
                             >
-                                <div className="mb-4">{feature.icon}</div>
-                                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                                <p className="text-white/70 leading-relaxed">{feature.description}</p>
+                                <div className="mb-3 sm:mb-4 text-3xl sm:text-4xl">{feature.icon}</div>
+                                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                                <p className="text-sm sm:text-base text-white/70 leading-relaxed">{feature.description}</p>
                             </motion.div>
                         ))}
                     </motion.div>

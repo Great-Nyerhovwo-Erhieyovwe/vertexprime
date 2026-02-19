@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLoading3Quarters } from 'react-icons/ai'
 import { HiCheckCircle } from 'react-icons/hi'
-import { Footer } from '../../../components/Footer/Footer'
+// import { Footer } from '../../../components/Footer/Footer'
 
 const Login = () => {
     const [email, setEmail] = useState('')
@@ -49,19 +49,37 @@ const Login = () => {
             setChartBars(prev => prev.map(() => Math.random() * 80 + 20))
         }, 100)
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            // Call actual API
+            const response = await fetch('http://localhost:4000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            })
+            
+            const data = await response.json()
+            
+            clearInterval(animationInterval)
+            
+            if (response.ok && data.token) {
+                // Save token and user info
+                localStorage.setItem('token', data.token)
+                localStorage.setItem('user', JSON.stringify(data.user))
+                setSuccessModal(true)
+                
+                // Redirect to dashboard after showing success message
+                setTimeout(() => {
+                    window.location.href = '/dashboard'
+                }, 2000)
+            } else {
+                setIsLoading(false)
+                setErrors({ email: data.message || 'Invalid credentials' })
+            }
+        } catch (error) {
             clearInterval(animationInterval)
             setIsLoading(false)
-            setSuccessModal(true)
-            
-            // Reset form after success
-            setTimeout(() => {
-                setSuccessModal(false)
-                setEmail('')
-                setPassword('')
-            }, 3000)
-        }, 3000)
+            setErrors({ email: 'Network error. Please try again.' })
+        }
     }
 
     const containerVariants = {
@@ -373,7 +391,7 @@ const Login = () => {
             )}
 
             {/* Footer */}
-            <Footer />
+            {/* <Footer /> */}
         </div>
     )
 }
