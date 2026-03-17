@@ -36,6 +36,7 @@ import routes from './routes/index.js';     // API routes
 import { connectMongo, getDb } from './utils/db.js'; // MongoDB utilities
 import { provider } from './services/dataProvider.js'; // Data provider (MongoDB/JSON)
 import jwt from 'jsonwebtoken';             // JWT token handling (optional, for reference)
+import path from 'path';
 
 // ============================================
 // INITIALIZE EXPRESS APP
@@ -81,6 +82,10 @@ app.use(express.urlencoded({ extended: true }));
 //   /api/admin/*          - Admin operations
 //   /api/dashboard/*      - User dashboard (requires JWT auth)
 app.use('/api', routes);
+
+// app.use('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'index.html'));
+// })
 
 // ============================================
 // GLOBAL ERROR HANDLER

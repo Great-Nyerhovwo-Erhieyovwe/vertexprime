@@ -79,8 +79,19 @@ export async function authenticate(req, res, next) {
             await provider.findOne("users", { _id: payload.sub }) || 
             await provider.findOne("users", { id: payload.sub });
 
-        // If user not found in database, token is invalid
+        // If user not found in database, allow a special environment-configured
+        // admin to authenticate using the admin email configured in env vars.
+        // This enables a single admin account defined by VITE_ADMIN_EMAIL/VITE_ADMIN_PASS
+        // to access admin-only routes without requiring a DB user record.
         if (!user) {
+            const envAdminEmail = process.env.VITE_ADMIN_EMAIL;
+            // If the token indicates an admin and matches the env admin email,
+            // attach a minimal admin user object to req.user and allow access.
+            if (payload && payload.role === 'admin' && payload.sub === envAdminEmail) {
+                req.user = { email: payload.sub, role: 'admin', envAdmin: true };
+                return next();
+            }
+
             console.warn(`User with ID ${payload.sub} not found in database`);
             return res.sendStatus(401);
         }
@@ -109,4 +120,3 @@ export async function authenticate(req, res, next) {
         return res.sendStatus(401); // 401 Unauthorized
     }
 }
-

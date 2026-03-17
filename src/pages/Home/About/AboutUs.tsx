@@ -206,7 +206,11 @@ const AboutUs = () => {
                         </p>
                     </motion.div>
 
-                    <motion.div className="grid grid-cols-1 gap-4 sm:gap-6" variants={staggerContainer} initial="initial" animate="animate">
+                    <motion.div className="relative space-y-12" variants={staggerContainer} initial="initial" animate="animate">
+
+                        {/* Vertical center line */}
+                        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-600 translate-x-1/2"></div> /* error attached will fix later */
+
                         {milestones.map((milestone, index) => (
                             <motion.div
                                 key={index}
@@ -220,6 +224,7 @@ const AboutUs = () => {
                                         <p className="text-white/70 text-sm">{milestone.event}</p>
                                     </div>
                                 </div>
+                                {/* </div> */}
                             </motion.div>
                         ))}
                     </motion.div>

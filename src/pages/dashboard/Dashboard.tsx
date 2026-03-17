@@ -8,6 +8,8 @@ import { TransactionHistory } from "../../components/Dashboard/TransactionHistor
 import { useDashboard } from "../../hooks/useDashboard";
 import "../../styles/dashboard.css";
 
+// const backendUrl = import.meta.env.VITE_API_URL;
+
 export const Dashboard: React.FC = () => {
   // Fetch real dashboard data from API
   const { user, portfolio, transactions, notifications, stats, loading, error } = useDashboard();
@@ -41,6 +43,7 @@ export const Dashboard: React.FC = () => {
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
+
 
   // Transform notifications to match expected format
   const transformedNotifications = (notifications || []).map(notif => ({

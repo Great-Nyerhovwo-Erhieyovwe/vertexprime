@@ -23,7 +23,7 @@ function generateOTP() {
 
 async function sendOTPEmail(email, otp) {
     const mailOptions = {
-        from: process.env.EMAIL_FROM || process.env.VITE_EMAIL_FROM || 'noreply@vertexprime.com',
+        from: process.env.EMAIL_FROM || process.env.VITE_EMAIL_FROM || 'vertexprimecapitals@gmail.com',
         to: email,
         subject: 'VertexPrime Capital - Verification Code',
         text: `Your verification code is: ${otp}`,
@@ -48,9 +48,11 @@ export async function sendOtp(req, res) {
         otpStore.set(email, { otp, ts: Date.now() });
         
         // In development mode, allow proceeding without actually sending email
-        if (process.env.NODE_ENV === 'development' || process.env.VITE_APP_ENV === 'development') {
+        if (process.env.NODE_ENV === 'production' || process.env.VITE_APP_ENV === 'production') {
             console.log(`📧 [DEV MODE] OTP would be sent to ${email}: ${otp}`);
-            return res.json({ success: true, devOtp: otp }); // Include OTP for testing
+            return res.json({ success: true, devOtp: otp }); // Include OTP for testing/locally
+        } else {
+            await sendOTPEmail(email, otp);
         }
         
         const sent = await sendOTPEmail(email, otp);

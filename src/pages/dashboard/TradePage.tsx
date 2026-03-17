@@ -1,273 +1,309 @@
 import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "../../components/Dashboard/DashboardLayout";
+import { Modal } from "../../components/Modal/Modal";
+import { Loading } from "../../components/Loading/Loading";
+
+const backendUrl = import.meta.env.VITE_API_URL;
 
 const TradePageContent: React.FC = () => {
-  const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
-  const [symbol, setSymbol] = useState<string>("BTC");
+  // STATE
   const [amount, setAmount] = useState<string>("");
+  const [asset, setAsset] = useState<string>("EUR/USD");
+  const [type, setType] = useState<"buy" | "sell">("buy");
+  const [leverage, setLeverage] = useState<number>(1);
 
-  const [cryptoAssets, setCryptoAssets] = useState<Array<any>>([]);
-  const [openTrades, setOpenTrades] = useState<Array<any>>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [availableBalance, setAvailableBalance] = useState<number>(0);
 
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "info";
+  }>({ isOpen: false, title: "", message: "", type: "info" });
+
+  const [recentTrades, setRecentTrades] = useState<Array<any>>([]);
+
+  // ASSETS
+  const assets = ["EUR/USD", "GBP/USD", "BTC/USD", "ETH/USD", "GOLD", "OIL"];
+
+  // FETCH DATA
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    // Fetch market data
-    fetch('http://localhost:4000/api/market')
-      .then((r) => r.json())
-      .then((d) => setCryptoAssets(d.markets || []))
-      .catch(() => setCryptoAssets([]));
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsLoading(false);
+        window.location.href = '/login';
+        return;
+      }
 
-    // Fetch portfolio open positions as open trades
-    if (token) {
-      fetch('http://localhost:4000/api/dashboard/portfolio', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-        .then((r) => r.json())
-        .then((d) => setOpenTrades(d.openPositions || []))
-        .catch(() => setOpenTrades([]));
-    }
+      try {
+        const [portfolioRes, tradesRes] = await Promise.all([
+          fetch(`${backendUrl}/api/dashboard/portfolio`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${backendUrl}/api/requests/trades`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        const portfolio = await portfolioRes.json();
+        const trades = await tradesRes.json();
+
+        setAvailableBalance(portfolio.totalBalance || portfolio.balanceUsd || 0);
+
+        if (trades.success && trades.trades) {
+          const sorted = trades.trades.sort(
+            (a: any, b: any) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime()
+          );
+          setRecentTrades(sorted.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const selectedAsset = cryptoAssets.find((a) => a.symbol === symbol) || cryptoAssets.find((a:any)=>a.symbol?.startsWith(symbol)) || undefined;
+  // SUBMIT TRADE
+  const handleSubmitTrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!amount || parseFloat(amount) <= 0) {
+      setModal({ isOpen: true, title: "Invalid Amount", message: "Please enter a valid trade amount", type: "error" });
+      return;
+    }
+
+    if (parseFloat(amount) > availableBalance) {
+      setModal({ isOpen: true, title: "Insufficient Balance", message: "You don't have enough balance for this trade", type: "error" });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token");
+
+      const response = await fetch(`${backendUrl}/api/requests/trade`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: parseFloat(amount),
+          asset,
+          type,
+          leverage,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setModal({
+          isOpen: true,
+          title: "Trade Executed",
+          message: `${type.toUpperCase()} ${amount} of ${asset} executed successfully. Your balance has been updated. Awaiting admin trade report.`,
+          type: "success",
+        });
+        setAmount("");
+
+        setTimeout(() => {
+          const token = localStorage.getItem("token");
+          Promise.all([
+            fetch(`${backendUrl}/api/dashboard/portfolio`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }).then((r) => r.json()),
+            fetch(`${backendUrl}/api/requests/trades`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }).then((r) => r.json()),
+          ]).then(([portfolio, trades]) => {
+            setAvailableBalance(portfolio.totalBalance || portfolio.balanceUsd || 0);
+            if (trades.success) {
+              const sorted = trades.trades.sort(
+                (a: any, b: any) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime()
+              );
+              setRecentTrades(sorted.slice(0, 5));
+            }
+          });
+        }, 1000);
+      } else {
+        setModal({ isOpen: true, title: "Trade Failed", message: data.message || "Failed to execute trade", type: "error" });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setModal({ isOpen: true, title: "Error", message: "Failed to execute trade", type: "error" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) return <Loading isLoading={true} message="Loading trading page..." />;
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      <Loading isLoading={isSubmitting} message="Executing trade..." />
+      <Modal isOpen={modal.isOpen} title={modal.title} message={modal.message} type={modal.type} onClose={() => setModal({ ...modal, isOpen: false })} />
+
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Trade</h1>
-        <p className="text-gray-600 mt-2">Buy and sell cryptocurrency instantly</p>
+        <h1 className="text-3xl font-bold text-gray-900">Execute Trade</h1>
+        <p className="text-gray-600 mt-2">Trade currency pairs, commodities, and cryptocurrencies</p>
       </div>
 
-      {/* Trade Widget */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trading Form */}
-        <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          {/* Trade Type Selector */}
-          <div className="flex gap-4 mb-6">
-            <button
-              onClick={() => setTradeType("buy")}
-              className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
-                tradeType === "buy"
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Buy
-            </button>
-            <button
-              onClick={() => setTradeType("sell")}
-              className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
-                tradeType === "sell"
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Sell
-            </button>
-          </div>
+      <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
+        <p className="text-sm text-gray-600 mb-2">Available Balance</p>
+        <p className="text-4xl font-bold text-purple-600">
+          ${availableBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+      </div>
 
-          <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Trade Form */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">New Trade</h2>
+
+          <form onSubmit={handleSubmitTrade} className="space-y-4">
             {/* Asset Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Asset
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Asset</label>
               <select
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={asset}
+                onChange={(e) => setAsset(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                {cryptoAssets.map((asset) => (
-                  <option key={asset.symbol} value={asset.symbol}>
-                    {asset.symbol} - {asset.name}
-                  </option>
+                {assets.map((a) => (
+                  <option key={a} value={a}>{a}</option>
                 ))}
               </select>
             </div>
 
-            {/* Current Price */}
-            {selectedAsset && (
-              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-3xl">{selectedAsset.icon}</span>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">
-                      ${selectedAsset.price.toFixed(2)}
-                    </p>
-                    <p
-                      className={`text-sm font-medium ${
-                        selectedAsset.change >= 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {selectedAsset.change >= 0 ? "+" : ""}
-                      {selectedAsset.change}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Amount Input */}
+            {/* Trade Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount ({symbol})
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Trade Type</label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setType("buy")}
+                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                    type === "buy" ? "bg-green-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Buy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setType("sell")}
+                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                    type === "sell" ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Sell
+                </button>
+              </div>
+            </div>
+
+            {/* Amount */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Trade Amount</label>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 font-medium">$</span>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  step="0.01"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Leverage */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Leverage: {leverage}x</label>
               <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="range"
+                min="1"
+                max="50"
+                value={leverage}
+                onChange={(e) => setLeverage(parseInt(e.target.value))}
+                className="w-full"
               />
             </div>
 
-            {/* Estimated Value */}
-            {amount && selectedAsset && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-700">Amount:</span>
-                  <span className="font-medium text-gray-900">
-                    {amount} {symbol}
-                  </span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-700">Price:</span>
-                  <span className="font-medium text-gray-900">
-                    ${selectedAsset.price.toFixed(2)}
-                  </span>
-                </div>
-                <div className="border-t border-blue-200 pt-2 flex justify-between">
-                  <span className="text-gray-700 font-medium">Total:</span>
-                  <span className="font-bold text-gray-900">
-                    ${(parseFloat(amount) * selectedAsset.price).toFixed(2)}
-                  </span>
+            {/* Summary */}
+            {amount && (
+              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Trade Amount:</span>
+                    <span className="font-medium">${amount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Leverage:</span>
+                    <span className="font-medium">{leverage}x</span>
+                  </div>
+                  <div className="border-t border-purple-200 pt-2 flex justify-between font-bold">
+                    <span>Deduct from Balance:</span>
+                    <span className="text-red-600">${amount}</span>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Trade Button */}
             <button
-              disabled={!amount}
-              className={`w-full py-3 rounded-lg font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                tradeType === "buy"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-red-600 hover:bg-red-700"
-              }`}
+              type="submit"
+              disabled={!amount || isSubmitting}
+              className="w-full px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {tradeType === "buy" ? "Buy" : "Sell"} {symbol}
+              {isSubmitting ? "Executing..." : "Execute Trade"}
             </button>
-          </div>
+          </form>
         </div>
 
-        {/* Market Overview */}
+        {/* Active Trades */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
-            Market Overview
-          </h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Your Trades</h2>
           <div className="space-y-3">
-            {cryptoAssets.map((asset: any) => (
-              <button
-                key={asset.symbol}
-                onClick={() => setSymbol(asset.symbol)}
-                className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-                  symbol === asset.symbol
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-gray-900">{asset.symbol}</p>
-                    <p className="text-xs text-gray-600">{asset.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900">
-                      ${asset.price.toFixed(2)}
-                    </p>
-                    <p
-                      className={`text-xs font-medium ${
-                        asset.change >= 0
-                          ? "text-green-600"
-                          : "text-red-600"
+            {recentTrades.length > 0 ? (
+              recentTrades.map((trade) => (
+                <div key={trade._id} className="p-3 border border-gray-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {trade.type.toUpperCase()} {trade.asset}
+                      </p>
+                      <p className="text-sm text-gray-600">${trade.amount}</p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        trade.status === "closed"
+                          ? trade.result === "gain"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
-                      {asset.change >= 0 ? "+" : ""}
-                      {asset.change}%
-                    </p>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Open Trades */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Open Trades</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Asset
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Type
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Entry Price
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Current
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  P&L
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              { (openTrades.length ? openTrades : [
-                    {
-                      symbol: "BTC",
-                      type: "Buy",
-                      amount: 0.5,
-                      entryPrice: 40000,
-                      current: 42500,
-                      pnl: 1250,
-                    }
-                  ])
-                .map((trade, idx) => (
-                <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                    {trade.symbol}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                      {trade.type}
+                      {trade.status === "closed"
+                        ? trade.result === "gain"
+                          ? `+$${trade.resultAmount}`
+                          : `-$${trade.resultAmount}`
+                        : "Pending"}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    {trade.amount}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    ${trade.entryPrice}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    ${trade.current}
-                  </td>
-                  <td className="px-4 py-3 text-sm font-bold text-green-600">
-                    +${trade.pnl}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  <p className="text-xs text-gray-500">{new Date(trade.requestedAt).toLocaleDateString()}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-600 text-center py-4">No trades yet</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -275,26 +311,38 @@ const TradePageContent: React.FC = () => {
 };
 
 export const TradePage: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      window.location.href = '/login';
+      return;
+    }
 
-    fetch('http://localhost:4000/api/dashboard/user', { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch(`${backendUrl}/api/dashboard/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((r) => r.json())
-      .then((d) => setUser({
-        name: `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'User',
-        email: d.email || '',
-        isVerified: d.emailVerified || false
-      }))
-      .catch(() => setUser({ name: 'User', email: '', isVerified: false }));
+      .then((d) => {
+        if (d) {
+          setUserProfile({
+            name: `${d.firstName || ""} ${d.lastName || ""}`.trim() || "User",
+            email: d.email || "",
+            isVerified: d.emailVerified || false,
+          });
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  if (!user) return <div>Loading...</div>;
+  if (loading) return null;
 
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout user={userProfile || { name: "User", email: "" }}>
       <TradePageContent />
     </DashboardLayout>
   );

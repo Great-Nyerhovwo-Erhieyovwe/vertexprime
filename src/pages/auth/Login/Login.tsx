@@ -6,6 +6,8 @@ import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLoading3Quarters } from '
 import { HiCheckCircle } from 'react-icons/hi'
 // import { Footer } from '../../../components/Footer/Footer'
 
+const backendUrl = import.meta.env.VITE_API_URL;
+
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -51,7 +53,7 @@ const Login = () => {
 
         try {
             // Call actual API
-            const response = await fetch('http://localhost:4000/api/auth/login', {
+            const response = await fetch(`${backendUrl}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -260,7 +262,7 @@ const Login = () => {
                     </motion.div>
 
                     {/* Chart Animation Loader */}
-                    {isLoading && (
+                    {/* {isLoading && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -280,7 +282,7 @@ const Login = () => {
                             </div>
                             <p className="text-gray-500 text-xs text-center mt-4">Secure authentication in progress...</p>
                         </motion.div>
-                    )}
+                    )} */}
                 </motion.div>
             </div>
 
@@ -310,7 +312,7 @@ const Login = () => {
                             <div>
                                 <h4 className="font-semibold text-white mb-2">Risk Disclosure</h4>
                                 <p>
-                                    Trading and investing involve substantial risk. Past performance is not indicative of future results. VertexPrime Capital does not guarantee returns.
+                                    Trading and investing involve substantial risk. Past performance is not indicative of future results. VertexPrime Capital does not guarantee past returns.
                                 </p>
                             </div>
 

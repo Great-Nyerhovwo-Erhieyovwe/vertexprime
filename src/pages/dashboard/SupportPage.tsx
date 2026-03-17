@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "../../components/Dashboard/DashboardLayout";
+// import Loading from "../../components/Loading/Loading";
+
+const backendUrl = import.meta.env.VITE_API_URL;
 
 const SupportPageContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"faq" | "contact">("faq");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  // const [isLoading, setIsLoading] = useState(true);
 
   const faqs = [
     {
@@ -59,6 +63,8 @@ const SupportPageContent: React.FC = () => {
       ],
     },
   ];
+
+  //  if (isLoading) return <Loading isLoading={true} message="Loading support page..." />;
 
   return (
     <div className="space-y-6">
@@ -204,9 +210,9 @@ const SupportPageContent: React.FC = () => {
 
             {/* Phone */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Phone</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Phone (WhatsApp)</h3>
               <p className="text-gray-600 mb-3">
-                +1 (800) 123-4567
+                +63 (935) 686-9755
               </p>
               <p className="text-sm text-gray-600">
                 Available: Mon-Fri 9AM-6PM EST
@@ -242,14 +248,40 @@ const SupportPageContent: React.FC = () => {
 };
 
 export const SupportPage: React.FC = () => {
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    isVerified: true,
-  };
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      window.location.href = '/login';
+      return;
+    }
+
+    fetch(`${backendUrl}/api/dashboard/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d) {
+          setUserProfile({
+            name: `${d.firstName || ""} ${d.lastName || ""}`.trim() || "User",
+            email: d.email || "",
+            isVerified: d.emailVerified || false,
+          });
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+
+
 
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout user={userProfile || { name: "User", email: "" }}>
       <SupportPageContent />
     </DashboardLayout>
   );

@@ -1,10 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "../../components/Dashboard/DashboardLayout";
+import { Modal } from "../../components/Modal/Modal";
+import { Loading } from "../../components/Loading/Loading";
+
+const backendUrl = import.meta.env.VITE_API_URL;
 
 const DepositPageContent: React.FC = () => {
+  // ============================================================================
+  // STATE MANAGEMENT
+  // ============================================================================
+
+  // Form state
   const [selectedMethod, setSelectedMethod] = useState<string>("bank");
   const [amount, setAmount] = useState<string>("");
 
+  // UI state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [availableBalance, setAvailableBalance] = useState<number>(0);
+
+  // Modal state for feedback
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "info" | "confirm";
+  }>({ isOpen: false, title: "", message: "", type: "info" });
+
+  // Deposit history
+  const [recentDeposits, setRecentDeposits] = useState<Array<any>>([]);
+
+  // ============================================================================
+  // DEPOSIT METHODS
+  // ============================================================================
   const depositMethods = [
     {
       id: "bank",
@@ -12,6 +40,7 @@ const DepositPageContent: React.FC = () => {
       icon: "🏦",
       processingTime: "1-3 business days",
       fee: "Free",
+      enabled: true,
     },
     {
       id: "card",
@@ -19,6 +48,7 @@ const DepositPageContent: React.FC = () => {
       icon: "💳",
       processingTime: "Instant",
       fee: "2%",
+      enabled: false,
     },
     {
       id: "crypto",
@@ -26,6 +56,7 @@ const DepositPageContent: React.FC = () => {
       icon: "₿",
       processingTime: "10-30 minutes",
       fee: "0.5%",
+      enabled: true,
     },
     {
       id: "wallet",
@@ -33,36 +64,185 @@ const DepositPageContent: React.FC = () => {
       icon: "📱",
       processingTime: "Instant",
       fee: "1%",
+      enabled: false,
     },
   ];
 
   const selectedMethodData = depositMethods.find((m) => m.id === selectedMethod);
-  const [recentDeposits, setRecentDeposits] = useState<Array<any>>([]);
-  const [availableBalance, setAvailableBalance] = useState<number | null>(null);
 
+  // ============================================================================
+  // DATA FETCHING - GET INITIAL DATA
+  // ============================================================================
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsLoading(false);
+        window.location.href = "/login";
+        return;
+      }
 
-    // Fetch portfolio balance
-    fetch('http://localhost:4000/api/dashboard/portfolio', { headers: { 'Authorization': `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((d) => setAvailableBalance(d.totalBalance || d.balanceUsd || null))
-      .catch(() => setAvailableBalance(null));
+      try {
+        // Fetch portfolio and deposit history in parallel
+        const [portfolioRes, depositsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/dashboard/portfolio`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${backendUrl}/api/requests/deposits`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-    // Fetch transactions and filter deposits
-    fetch('http://localhost:4000/api/dashboard/transactions?limit=20&offset=0', { headers: { 'Authorization': `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((d) => setRecentDeposits((d.transactions || []).filter((t:any)=>t.type==='deposit')))
-      .catch(() => setRecentDeposits([]));
+        const portfolio = await portfolioRes.json();
+        const deposits = await depositsRes.json();
+
+        setAvailableBalance(portfolio.totalBalance || portfolio.balanceUsd || 0);
+
+        if (deposits.success && deposits.deposits) {
+          // Show only last 5 deposits, sorted by most recent
+          const sorted = deposits.deposits.sort(
+            (a: any, b: any) =>
+              new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime()
+          );
+          setRecentDeposits(sorted.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
+  // ============================================================================
+  // FORM SUBMISSION HANDLER
+  // ============================================================================
+  const handleSubmitDeposit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Client-side validation
+    if (!amount || parseFloat(amount) < 50) {
+      setModal({
+        isOpen: true,
+        title: "Invalid Amount",
+        message: "Minimum deposit amount is $50",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token");
+
+      // Call backend endpoint to create deposit request
+      const response = await fetch(`${backendUrl}/api/requests/deposit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: parseFloat(amount),
+          paymentMethod: selectedMethod,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Success! Show confirmation modal
+        setModal({
+          isOpen: true,
+          title: "Deposit Request Submitted",
+          message: `Your deposit of $${amount} has been submitted successfully. Our admins will review and approve your request within 24 hours.`,
+          type: "success",
+        });
+
+        // Clear form
+        setAmount("");
+
+        // Refresh deposit history after 1 second
+        setTimeout(() => {
+          const token = localStorage.getItem("token");
+          fetch(`${backendUrl}/api/requests/deposits`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.success && d.deposits) {
+                const sorted = d.deposits.sort(
+                  (a: any, b: any) =>
+                    new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime()
+                );
+                setRecentDeposits(sorted.slice(0, 5));
+              }
+            });
+        }, 1000);
+      } else {
+        // Backend validation failed
+        setModal({
+          isOpen: true,
+          title: "Deposit Failed",
+          message: data.message || "Failed to submit deposit request",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Deposit submission error:", error);
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "Failed to submit deposit. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+  if (isLoading) {
+    return <Loading isLoading={true} message="Loading deposit page..." />;
+  }
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
   return (
     <div className="space-y-6">
+      {/* Loading overlay when submitting */}
+      <Loading isLoading={isSubmitting} message="Processing your deposit..." />
+
+      {/* Feedback modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+      />
+
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Deposit Funds</h1>
-        <p className="text-gray-600 mt-2">Add funds to your trading account</p>
+        <p className="text-gray-600 mt-2">
+          Add funds to your trading account and start investing
+        </p>
+      </div>
+
+      {/* Available Balance */}
+      <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
+        <p className="text-sm text-gray-600 mb-2">Available Balance</p>
+        <p className="text-4xl font-bold text-blue-600">
+          ${availableBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
       </div>
 
       {/* Deposit Methods */}
@@ -74,11 +254,14 @@ const DepositPageContent: React.FC = () => {
           {depositMethods.map((method) => (
             <button
               key={method.id}
-              onClick={() => setSelectedMethod(method.id)}
+              onClick={() => method.enabled && setSelectedMethod(method.id)}
+              disabled={!method.enabled}
               className={`p-4 rounded-lg border-2 transition-all text-left ${
-                selectedMethod === method.id
-                  ? "border-blue-600 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300 bg-white"
+                !method.enabled
+                  ? "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                  : selectedMethod === method.id
+                    ? "border-blue-600 bg-blue-50 cursor-pointer"
+                    : "border-gray-200 hover:border-gray-300 bg-white cursor-pointer"
               }`}
             >
               <div className="flex items-start justify-between mb-2">
@@ -92,7 +275,14 @@ const DepositPageContent: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">Fee: {method.fee}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">Fee: {method.fee}</p>
+                {!method.enabled && (
+                  <span className="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded">
+                    Coming Soon
+                  </span>
+                )}
+              </div>
             </button>
           ))}
         </div>
@@ -104,11 +294,11 @@ const DepositPageContent: React.FC = () => {
           {selectedMethodData?.name}
         </h2>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmitDeposit} className="space-y-4">
           {/* Amount Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount to Deposit
+              Deposit Amount
             </label>
             <div className="flex items-center gap-2">
               <span className="text-gray-600 font-medium">$</span>
@@ -117,9 +307,14 @@ const DepositPageContent: React.FC = () => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
+                min="50"
+                step="0.01"
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Minimum deposit: $50
+            </p>
           </div>
 
           {/* Fee Information */}
@@ -127,19 +322,21 @@ const DepositPageContent: React.FC = () => {
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Amount:</span>
+                  <span className="text-gray-700">Deposit Amount:</span>
                   <span className="font-medium text-gray-900">${amount}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Fee:</span>
+                  <span className="text-gray-700">Fee ({selectedMethodData?.fee}):</span>
                   <span className="font-medium text-gray-900">
-                    ${(parseFloat(amount) * 0.02).toFixed(2)}
+                    ${(parseFloat(amount) * (parseFloat(selectedMethodData?.fee || "0") / 100)).toFixed(2)}
                   </span>
                 </div>
                 <div className="border-t border-blue-200 pt-2 flex justify-between">
-                  <span className="text-gray-700 font-medium">Total:</span>
+                  <span className="text-gray-700 font-medium">
+                    You'll Deposit:
+                  </span>
                   <span className="font-bold text-gray-900">
-                    ${(parseFloat(amount) * 1.02).toFixed(2)}
+                    ${(parseFloat(amount) - (parseFloat(amount) * (parseFloat(selectedMethodData?.fee || "0") / 100))).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -147,15 +344,13 @@ const DepositPageContent: React.FC = () => {
           )}
 
           {/* Additional Info */}
-          {selectedMethod === "bank" && (
+          {selectedMethod === 'bank' && (
             <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3">
-              <p className="text-sm font-medium text-gray-900">
-                Bank Account Details
-              </p>
+              <p className="text-sm font-medium text-gray-900">Bank Account Details</p>
               <div className="space-y-2 text-sm text-gray-600">
                 <div>
                   <p className="text-xs text-gray-500">Account Number</p>
-                  <p className="font-mono text-gray-900">8765 4321 0987</p>
+                  <p className="font-mono text-gray-900">Unavailabe now! (Updated soon...)</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Routing Number</p>
@@ -163,47 +358,46 @@ const DepositPageContent: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Bank Name</p>
-                  <p className="font-mono text-gray-900">
-                    VertexPrime Financial Bank
-                  </p>
+                  <p className="font-mono text-gray-900">VertexPrime Financial Bank</p>
                 </div>
               </div>
             </div>
           )}
 
-          {selectedMethod === "crypto" && (
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3">
-              <p className="text-sm font-medium text-gray-900">
-                Wallet Address
-              </p>
+          {selectedMethod === 'crypto' && (
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y3">
+              <p className="text-sm font-medium text-gray-900">Wallet Address</p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 p-2 bg-white border border-gray-300 rounded font-mono text-xs text-gray-900">
-                  1A1z7agoat2YLZW5QN8hgWFh5p0Y8eB7Sc
+                  THQYgNzTYo7g5aBhhJLMc2FaA632FwZ4WK
                 </code>
                 <button className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="MB 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                   </svg>
                 </button>
               </div>
             </div>
           )}
 
+          {/* Terms Agreement */}
+          <div className="flex items-start gap-3">
+            <input type="checkbox" id="terms" className="mt-1" />
+            <label htmlFor="terms" className="text-sm text-gray-600">
+              I agree to the terms and conditions and understand that my deposit
+              will be processed after admin approval
+            </label>
+          </div>
+
           {/* Submit Button */}
-          <button className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            Continue Deposit
+          <button
+            type="submit"
+            disabled={!amount || isSubmitting}
+            className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? "Submitting..." : "Submit Deposit Request"}
           </button>
-        </div>
+        </form>
       </div>
 
       {/* Recent Deposits */}
@@ -212,48 +406,82 @@ const DepositPageContent: React.FC = () => {
           Recent Deposits
         </h2>
         <div className="space-y-3">
-          {(recentDeposits.length ? recentDeposits : []).map((deposit) => (
-            <div
-              key={deposit.id || deposit._id}
-              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div>
-                <p className="font-medium text-gray-900">{deposit.method || deposit.paymentMethod || 'Deposit'}</p>
-                <p className="text-sm text-gray-600">{deposit.date || deposit.createdAt || ''}</p>
+          {recentDeposits.length > 0 ? (
+            recentDeposits.map((deposit) => (
+              <div
+                key={deposit._id}
+                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div>
+                  <p className="font-medium text-gray-900">
+                    ${deposit.amount} - {deposit.paymentMethod}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(deposit.requestedAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                      deposit.status === "approved"
+                        ? "bg-green-100 text-green-800"
+                        : deposit.status === "rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1)}
+                  </span>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-gray-900">+${deposit.amount || deposit.value || 0}</p>
-                <p className="text-sm text-green-600">{deposit.status || 'Completed'}</p>
-              </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-600 text-center py-4">No deposits yet</p>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
+// ============================================================================
+// PAGE WRAPPER WITH USER PROFILE FETCHING
+// ============================================================================
 export const DepositPage: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-    fetch('http://localhost:4000/api/dashboard/user', { headers: { 'Authorization': `Bearer ${token}` } })
+    // Fetch real user profile from API
+    fetch(`${backendUrl}/api/dashboard/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((r) => r.json())
-      .then((d) => setUser({
-        name: `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'User',
-        email: d.email || '',
-        isVerified: d.emailVerified || false
-      }))
-      .catch(() => setUser({ name: 'User', email: '', isVerified: false }));
+      .then((d) => {
+        if (d) {
+          setUserProfile({
+            name: `${d.firstName || ""} ${d.lastName || ""}`.trim() || "User",
+            email: d.email || "",
+            isVerified: d.emailVerified || false,
+          });
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   }, []);
 
-  if (!user) return <div>Loading...</div>;
+  if (loading) return null;
 
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout user={userProfile || { name: "User", email: "" }}>
       <DepositPageContent />
     </DashboardLayout>
   );

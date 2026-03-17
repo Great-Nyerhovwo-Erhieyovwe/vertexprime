@@ -1,328 +1,374 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "../../components/Dashboard/DashboardLayout";
+import { Modal } from "../../components/Modal/Modal";
+import { Loading } from "../../components/Loading/Loading";
 
-type VerificationLevel = "basic" | "advanced" | "expert";
+const backendUrl = import.meta.env.VITE_API_URL;
 
 const VerificationPageContent: React.FC = () => {
-  const [currentLevel, setCurrentLevel] = useState<VerificationLevel>("basic");
-  const [activeStep, setActiveStep] = useState(1);
+  // STATE
+  const [documentType, setDocumentType] = useState<string>("passport");
+  const [documentNumber, setDocumentNumber] = useState<string>("");
+  const [expiryDate, setExpiryDate] = useState<string>("");
+  const [fullName, setFullName] = useState<string>("");
 
-  const verificationLevels = [
-    {
-      level: "basic" as const,
-      name: "Basic Verification",
-      icon: "✓",
-      status: "verified",
-      completedDate: "Jan 15, 2026",
-      requirements: [
-        { name: "Email verification", status: "completed" },
-        { name: "Phone verification", status: "completed" },
-      ],
-    },
-    {
-      level: "advanced" as const,
-      name: "Advanced Verification",
-      icon: "⭐",
-      status: "pending",
-      completedDate: null,
-      requirements: [
-        { name: "Identity verification", status: "pending" },
-        { name: "Address verification", status: "pending" },
-        { name: "Documents upload", status: "pending" },
-      ],
-    },
-    {
-      level: "expert" as const,
-      name: "Expert Verification",
-      icon: "👑",
-      status: "not-started",
-      completedDate: null,
-      requirements: [
-        { name: "Advanced KYC", status: "not-started" },
-        { name: "Business verification", status: "not-started" },
-        { name: "Bank details", status: "not-started" },
-      ],
-    },
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "info";
+  }>({ isOpen: false, title: "", message: "", type: "info" });
+
+  const [recentVerifications, setRecentVerifications] = useState<Array<any>>([]);
+
+  // DOCUMENT TYPES
+  const docTypes = [
+    { value: "passport", label: "Passport" },
+    { value: "drivers_license", label: "Driver's License" },
+    { value: "national_id", label: "National ID" },
+    { value: "visa", label: "Visa" },
   ];
 
-  const advancedSteps = [
-    {
-      number: 1,
-      title: "Identity Verification",
-      description: "Upload a valid government-issued ID",
-      completed: false,
-    },
-    {
-      number: 2,
-      title: "Address Verification",
-      description: "Upload a recent utility bill or bank statement",
-      completed: false,
-    },
-    {
-      number: 3,
-      title: "Selfie Verification",
-      description: "Take a selfie with your ID for liveness check",
-      completed: false,
-    },
-    {
-      number: 4,
-      title: "Review",
-      description: "Wait for our team to review your documents",
-      completed: false,
-    },
-  ];
+  // FETCH DATA ON MOUNT
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsLoading(false);
+        window.location.href = '/login';
+        return;
+      }
+
+      try {
+        const [userRes, verificationsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/dashboard/user`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${backendUrl}/api/requests/verifications`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        const user = await userRes.json();
+        const verifications = await verificationsRes.json();
+
+        // Set full name from user
+        if (user) {
+          setFullName(
+            `${user.firstName || ""} ${user.lastName || ""}`.trim() || ""
+          );
+        }
+
+        // Set recent verifications
+        if (verifications.success && verifications.verifications) {
+          const sorted = verifications.verifications.sort(
+            (a: any, b: any) =>
+              new Date(b.requestedAt).getTime() -
+              new Date(a.requestedAt).getTime()
+          );
+          setRecentVerifications(sorted.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // VALIDATE FORM
+  const validateForm = (): string | null => {
+    if (!fullName.trim()) return "Please enter your full name";
+    if (!documentType) return "Please select a document type";
+    if (!documentNumber.trim()) return "Please enter document number";
+    if (!expiryDate) return "Please enter expiry date";
+
+    // Validate expiry date is in future
+    const expiry = new Date(expiryDate);
+    if (expiry < new Date()) return "Document must not be expired";
+
+    return null;
+  };
+
+  // SUBMIT VERIFICATION REQUEST
+  const handleSubmitVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const error = validateForm();
+    if (error) {
+      setModal({
+        isOpen: true,
+        title: "Validation Error",
+        message: error,
+        type: "error",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token");
+
+      const response = await fetch(`${backendUrl}/api/requests/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          documentType,
+          documentNumber,
+          expiryDate,
+          fullName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setModal({
+          isOpen: true,
+          title: "Verification Submitted",
+          message: `Your ${docTypes.find((d) => d.value === documentType)?.label} verification has been submitted. Our team will review and approve within 24-48 hours.`,
+          type: "success",
+        });
+
+        // Reset form
+        setDocumentNumber("");
+        setExpiryDate("");
+
+        // Refresh verification history
+        setTimeout(() => {
+          const token = localStorage.getItem("token");
+          if (token) {
+            fetch(`${backendUrl}/api/requests/verifications`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+              .then((r) => r.json())
+              .then((d) => {
+                if (d.success && d.verifications) {
+                  const sorted = d.verifications.sort(
+                    (a: any, b: any) =>
+                      new Date(b.requestedAt).getTime() -
+                      new Date(a.requestedAt).getTime()
+                  );
+                  setRecentVerifications(sorted.slice(0, 5));
+                }
+              });
+          }
+        }, 1000);
+      } else {
+        setModal({
+          isOpen: true,
+          title: "Submission Failed",
+          message: data.message || "Failed to submit verification request",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "Failed to submit verification request",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
+    return <Loading isLoading={true} message="Loading verification page..." />;
+  }
+
+  // Status badge colors
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-yellow-100 text-yellow-800";
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      <Loading isLoading={isSubmitting} message="Submitting verification..." />
+      <Modal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+      />
+
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Account Verification</h1>
-        <p className="text-gray-600 mt-2">Complete verification levels to increase trading limits</p>
+        <h1 className="text-3xl font-bold text-gray-900">Identity Verification</h1>
+        <p className="text-gray-600 mt-2">
+          Verify your identity to unlock full platform access
+        </p>
       </div>
 
-      {/* Verification Levels */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {verificationLevels.map((level) => (
-          <div
-            key={level.level}
-            className={`rounded-lg border-2 p-6 transition-all cursor-pointer ${
-              currentLevel === level.level
-                ? "border-blue-600 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
-            }`}
-            onClick={() => setCurrentLevel(level.level)}
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <span className="text-3xl mb-2 block">{level.icon}</span>
-                <h3 className="text-lg font-bold text-gray-900">{level.name}</h3>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  level.status === "verified"
-                    ? "bg-green-100 text-green-700"
-                    : level.status === "pending"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {level.status === "verified"
-                  ? "✓ Verified"
-                  : level.status === "pending"
-                    ? "⏳ Pending"
-                    : "Not Started"}
-              </span>
-            </div>
-
-            {/* Completed Date */}
-            {level.completedDate && (
-              <p className="text-xs text-gray-600 mb-4">
-                Verified on {level.completedDate}
-              </p>
-            )}
-
-            {/* Requirements */}
-            <div className="space-y-2">
-              {level.requirements.map((req, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <span
-                    className={`text-sm ${
-                      req.status === "completed"
-                        ? "text-green-600"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {req.status === "completed" ? "✓" : "○"}
-                  </span>
-                  <span className="text-sm text-gray-600">{req.name}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Action Button */}
-            {currentLevel === level.level && level.status !== "verified" && (
-              <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                Continue
-              </button>
-            )}
-          </div>
-        ))}
+      <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-4">
+        <p className="text-sm text-orange-800">
+          ⚠️ KYC verification is required to withdraw funds. Submit your valid government-issued ID to get started.
+        </p>
       </div>
 
-      {/* Advanced Verification Steps */}
-      {currentLevel === "advanced" && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Verification Form */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Verification Steps</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Submit Verification
+          </h2>
 
-          {/* Steps */}
-          <div className="space-y-4 mb-8">
-            {advancedSteps.map((step, idx) => (
-              <div key={step.number}>
-                <button
-                  onClick={() => setActiveStep(step.number)}
-                  className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                    activeStep === step.number
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                          step.completed
-                            ? "bg-green-600"
-                            : "bg-gray-400"
-                        }`}
-                      >
-                        {step.completed ? "✓" : step.number}
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-900">{step.title}</p>
-                        <p className="text-sm text-gray-600">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                    {step.completed && (
-                      <span className="text-green-600 font-bold">Verified</span>
-                    )}
-                  </div>
-                </button>
+          <form onSubmit={handleSubmitVerification} className="space-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name (as on document)
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="John Doe"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
 
-                {/* Step Content */}
-                {activeStep === step.number && !step.completed && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    {step.number === 1 && (
-                      <div className="space-y-4">
-                        <p className="text-sm text-gray-700">
-                          Please upload a clear photo of your government-issued ID
-                          (passport, driver's license, or national ID)
-                        </p>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                          <svg
-                            className="w-12 h-12 text-gray-400 mx-auto mb-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                            />
-                          </svg>
-                          <p className="text-gray-600 text-sm">
-                            Drag and drop your file here, or click to select
-                          </p>
-                        </div>
-                        <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                          Upload & Continue
-                        </button>
-                      </div>
-                    )}
+            {/* Document Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Document Type
+              </label>
+              <select
+                value={documentType}
+                onChange={(e) => setDocumentType(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                {docTypes.map((doc) => (
+                  <option key={doc.value} value={doc.value}>
+                    {doc.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                    {step.number === 2 && (
-                      <div className="space-y-4">
-                        <p className="text-sm text-gray-700">
-                          Please upload a recent utility bill or bank statement
-                        </p>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                          <svg
-                            className="w-12 h-12 text-gray-400 mx-auto mb-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
-                          <p className="text-gray-600 text-sm">
-                            Drag and drop your file here, or click to select
-                          </p>
-                        </div>
-                        <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                          Upload & Continue
-                        </button>
-                      </div>
-                    )}
+            {/* Document Number */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Document Number
+              </label>
+              <input
+                type="text"
+                value={documentNumber}
+                onChange={(e) => setDocumentNumber(e.target.value)}
+                placeholder="e.g., A12345678"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
 
-                    {step.number === 3 && (
-                      <div className="space-y-4">
-                        <p className="text-sm text-gray-700">
-                          Please take a clear selfie with your ID for liveness verification
-                        </p>
-                        <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                          Open Camera
-                        </button>
-                      </div>
-                    )}
+            {/* Expiry Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Expiry Date
+              </label>
+              <input
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
 
-                    {step.number === 4 && (
-                      <div className="space-y-4">
-                        <p className="text-sm text-gray-700">
-                          Your documents have been submitted for review. We'll verify
-                          them within 24-48 hours.
-                        </p>
-                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                          <p className="text-sm text-blue-900">
-                            ⏳ Estimated verification time: 24-48 hours
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+            {/* Document Upload Info */}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                📄 Ensure all details match your document exactly. Clear, legible scans are required.
+              </p>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={!documentNumber || !expiryDate || isSubmitting}
+              className="w-full px-6 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Submitting..." : "Submit for Verification"}
+            </button>
+          </form>
+
+          {/* Document Requirements */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="font-bold text-gray-900 mb-2">Document Requirements:</h3>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Must be a valid government-issued ID</li>
+              <li>• Must not be expired</li>
+              <li>• All fields must be clearly visible</li>
+              <li>• No filters or edits allowed</li>
+            </ul>
           </div>
         </div>
-      )}
 
-      {/* Benefits */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">
-          Verification Benefits
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            {
-              level: "Basic",
-              limit: "$10,000",
-              features: ["Email verified", "Phone verified"],
-            },
-            {
-              level: "Advanced",
-              limit: "$100,000",
-              features: ["Full KYC", "Higher limits", "Priority support"],
-            },
-            {
-              level: "Expert",
-              limit: "Unlimited",
-              features: ["Business verified", "Custom limits", "Dedicated manager"],
-            },
-          ].map((benefit, idx) => (
-            <div key={idx} className="p-4 border border-gray-200 rounded-lg">
-              <p className="font-bold text-gray-900 mb-2">{benefit.level}</p>
-              <p className="text-lg font-bold text-blue-600 mb-3">
-                Trading Limit: {benefit.limit}
+        {/* Verification History */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Verification History
+          </h2>
+          <div className="space-y-3">
+            {recentVerifications.length > 0 ? (
+              recentVerifications.map((verification) => (
+                <div
+                  key={verification._id}
+                  className="p-4 border border-gray-200 rounded-lg"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {docTypes.find((d) => d.value === verification.documentType)
+                          ?.label || verification.documentType}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {verification.documentNumber}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                        verification.status
+                      )}`}
+                    >
+                      {verification.status
+                        .charAt(0)
+                        .toUpperCase() + verification.status.slice(1)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {new Date(verification.requestedAt).toLocaleDateString()}
+                  </p>
+                  {verification.adminNotes && (
+                    <p className="text-xs text-gray-600 mt-2 p-2 bg-gray-50 rounded">
+                      {verification.adminNotes}
+                    </p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-600 text-center py-6">
+                No verification requests yet
               </p>
-              <ul className="space-y-1 text-sm text-gray-600">
-                {benefit.features.map((feature, fidx) => (
-                  <li key={fidx} className="flex items-center gap-2">
-                    <span className="text-green-600">✓</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -331,27 +377,37 @@ const VerificationPageContent: React.FC = () => {
 
 export const VerificationPage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      window.location.href = '/login'
+      return;
+    }
 
-    fetch('http://localhost:4000/api/dashboard/user', { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => {
+    fetch(`${backendUrl}/api/dashboard/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => {
         if (d) {
           setUserProfile({
-            name: `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'User',
-            email: d.email || '',
-            isVerified: d.emailVerified
+            name: `${d.firstName || ""} ${d.lastName || ""}`.trim() || "User",
+            email: d.email || "",
+            isVerified: d.emailVerified || false,
           });
         }
+        setLoading(false);
       })
-      .catch(() => {});
+      .catch(() => setLoading(false));
   }, []);
 
+  if (loading) return null;
+
   return (
-    <DashboardLayout user={userProfile || { name: 'User', email: '' }}>
+    <DashboardLayout user={userProfile || { name: "User", email: "" }}>
       <VerificationPageContent />
     </DashboardLayout>
   );

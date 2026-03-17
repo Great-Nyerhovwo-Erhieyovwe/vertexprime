@@ -1,4 +1,4 @@
-// src/pages/Admin/AdminLogin.tsx
+// src/pages/admin/AdminLogin.tsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,27 +6,37 @@ import { api } from "../../api/client";
 import { InputField } from "../../components/Form/InputField";
 import { motion } from "framer-motion";
 
-/* -----------------------------------------------------------------
-   AdminLogin – behaves like the normal login but enforces the admin
-   role after the JWT is obtained.
-   ----------------------------------------------------------------- */
-
+/**
+ * AdminLogin
+ *
+ * Frontend admin login page. This component:
+ * - Calls the dedicated admin login endpoint `/api/admin/login`
+ * - Stores the returned JWT in `localStorage` (used by `api` client)
+ * - Verifies the returned user object has `role: 'admin'`
+ * - Redirects to `/admin` on success
+ *
+ * Security notes (frontend): * - Avoid storing long-lived credentials in the browser. We store a JWT
+ *   which should be short-lived and refreshed via secure flows.
+ * - Admin pages should be further locked down on the backend (IP allowlist,
+ *   MFA) — frontend checks are only UX-oriented and NOT a security boundary.
+ */
 export default function AdminLogin() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
+  // Local form state
   const [form, setForm] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [serverError, setServerError] = useState("");
 
+  // Simple controlled input handler
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({});
     setServerError("");
   };
 
+  // Basic client-side validation for UX
   const validate = () => {
     const newErr: typeof errors = {};
     if (!form.email) newErr.email = "Email required.";
@@ -35,37 +45,57 @@ export default function AdminLogin() {
     return Object.keys(newErr).length === 0;
   };
 
-  const loginMutation = useMutation<any, Error, { email: string; password: string }>({
-    mutationFn: async (payload) =>
-      api.post("/api/auth/login", payload),
+  /**
+   * Use React Query mutation to call the admin login API.
+   * We target `/api/admin/login` which returns { success, token, user }.
+   */
+  const loginMutation = useMutation<any, unknown, { email: string; password: string }>({
+    mutationFn: async (payload) => api.post("/api/admin/login", payload),
     onSuccess: async (res: any) => {
-      // Store JWT
-      const token = res.data.token;
-      localStorage.setItem("token", token);
+      try {
+        // API returns a JWT token and user object
+        const token: string | undefined = res?.data?.token;
+        const user = res?.data?.user;
 
-      // Immediately fetch the user profile to inspect the role
-      const { data: user } = await api.get("/api/user/me");
+        if (!token) {
+          setServerError("Authentication failed: no token received.");
+          return;
+        }
 
-      if (user.role !== "admin") {
-        // Not an admin – clear token and show error
-        localStorage.removeItem("token");
-        setServerError(
-          "Your account does not have admin privileges. Please use the regular login."
-        );
-        navigate('/login');
-        return;
+        // Persist the token - the `api` client attaches it to subsequent requests
+        localStorage.setItem("token", token);
+
+        // Basic role check: ensure backend flagged this user as admin
+        if (!user || user.role !== "admin") {
+          // Defensive: remove token if returned user is not admin
+          localStorage.removeItem("token");
+          setServerError("Account is not authorized as admin.");
+          return;
+        }
+
+        // Invalidate cached `me` query so other parts of app will refresh
+        qc.invalidateQueries({ queryKey: ["me"] });
+
+        // Redirect to admin area
+        navigate("/admin", { replace: true });
+      } catch (err: any) {
+        console.error("Admin login:onSuccess handler error:", err);
+        setServerError("Unexpected error processing login result.");
       }
-
-      // Admin role confirmed – invalidate any stale queries
-      qc.invalidateQueries({ queryKey: ["me"] });
-
-      // Redirect to the admin dashboard
-      navigate("/admin", { replace: true });
     },
-    onError: () => {
-      setServerError("Invalid credentials – please try again.");
+    onError: (err: any) => {
+      // Surface API error message when available
+      const msg = err?.response?.data?.message || "Invalid credentials — please try again.";
+      setServerError(msg);
     },
   });
+
+  // React Query v5 vs older versions expose slightly different flags on
+  // the mutation object (`isLoading` or `isPending`). Compute a stable
+  // `isSubmitting` boolean that works across versions and TS checks.
+  const isSubmitting = !!(
+    (loginMutation as any).isLoading ?? (loginMutation as any).isPending ?? ((loginMutation as any).status === "loading")
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,14 +106,10 @@ export default function AdminLogin() {
   return (
     <section className="flex min-h-screen items-center justify-center bg-primary">
       <div className="glass w-full max-w-md p-8">
-        <h2 className="mb-6 text-center text-2xl font-bold text-white">
-          Admin Login
-        </h2>
+        <h2 className="mb-6 text-center text-2xl font-bold text-white">Admin Login</h2>
 
         {serverError && (
-          <p className="mb-4 rounded bg-red-900 p-2 text-center text-sm text-red-200">
-            {serverError}
-          </p>
+          <p className="mb-4 rounded bg-red-900 p-2 text-center text-sm text-red-200">{serverError}</p>
         )}
 
         <form onSubmit={handleSubmit}>
@@ -95,6 +121,7 @@ export default function AdminLogin() {
             onChange={handleChange}
             error={errors.email}
           />
+
           <InputField
             label="Password"
             name="password"
@@ -108,17 +135,14 @@ export default function AdminLogin() {
             type="submit"
             className="mt-4 w-full rounded-md bg-accent py-2 font-medium text-primary hover:bg-accent/90"
             whileHover={{ scale: 1.02 }}
-            disabled={loginMutation.isPending}
+            disabled={isSubmitting}
           >
-            {loginMutation.isPending ? "Signing in…" : "Sign In as Admin"}
+            {isSubmitting ? "Signing in…" : "Sign In as Admin"}
           </motion.button>
         </form>
 
         <p className="mt-6 text-center text-sm text-white/80">
-          Not an admin?{" "}
-          <Link to="/login" className="hover:text-accent">
-            Login as user...
-          </Link>
+          Not an admin? <Link to="/login" className="hover:text-accent">Login as user...</Link>
         </p>
       </div>
     </section>

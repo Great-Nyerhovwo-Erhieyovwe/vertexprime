@@ -11,6 +11,8 @@ interface DashboardNotification {
   icon: string;
 }
 
+const backendUrl = import.meta.env.VITE_API_URL;
+
 const NotificationsPageContent: React.FC = () => {
   const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -24,8 +26,8 @@ const NotificationsPageContent: React.FC = () => {
     }
 
     Promise.all([
-      fetch('http://localhost:4000/api/dashboard/user', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
-      fetch('http://localhost:4000/api/dashboard/notifications', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
+      fetch(`${backendUrl}/api/dashboard/user`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+      fetch(`${backendUrl}/api/dashboard/notifications`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
     ]).then(([userData, notificationsData]) => {
       if (userData) {
         setUserProfile({
@@ -252,9 +254,12 @@ export const NotificationsPage: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
 
-    fetch('http://localhost:4000/api/dashboard/user', { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch(`${backendUrl}/api/dashboard/user`, { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
         if (d) {

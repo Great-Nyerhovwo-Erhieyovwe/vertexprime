@@ -6,6 +6,8 @@ import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLoading3Quarters, AiOutli
 import { HiXMark } from 'react-icons/hi2'
 // import { Footer } from '../../../components/Footer/Footer'
 
+const backendUrl = import.meta.env.VITE_API_URL;
+
 const Signup = () => {
     // Form states
     const [step, setStep] = useState(1)
@@ -137,7 +139,7 @@ const Signup = () => {
 
         try {
             // Send OTP to backend
-            const response = await fetch('http://localhost:4000/api/auth/send-otp', {
+            const response = await fetch(`${backendUrl}/api/auth/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email }),
@@ -175,7 +177,7 @@ const Signup = () => {
         setOtpLoading(true)
 
         try {
-            const response = await fetch('http://localhost:4000/api/auth/verify-otp', {
+            const response = await fetch(`${backendUrl}/api/auth/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -209,7 +211,8 @@ const Signup = () => {
                     })
                     setAgreedToTerms(false)
                     setOtp('')
-                }, 4000)
+                    window.location.href = '/login'
+                }, 2000)
             } else {
                 setErrors({ otp: data.message || 'Invalid OTP. Please try again.' })
             }
@@ -839,7 +842,7 @@ const Signup = () => {
                             <div>
                                 <h4 className="font-semibold text-white mb-2">1. Risk Disclosure</h4>
                                 <p>
-                                    Trading and investing involve substantial risk of loss. Past performance does not guarantee future results. VertexPrime Capital does not guarantee, represent, or warrant that account funds will increase or be profitable.
+                                    Trading and investing involve substantial risk of loss. Past performance does not guarantee future results. VertexPrime Capital does not guarantee, represent, or warrant that account funds will increase or be profitable on self trading.
                                 </p>
                             </div>
 
@@ -867,7 +870,7 @@ const Signup = () => {
                             <div>
                                 <h4 className="font-semibold text-white mb-2">5. Limitation of Liability</h4>
                                 <p>
-                                    VertexPrime Capital is not liable for any indirect, incidental, or consequential damages. Trading involves substantial risk and may not be suitable for all investors.
+                                    VertexPrime Capital is not liable for any indirect, incidental, or consequential self damages. Trading involves substantial risk and may not be suitable for all unexperienced investors.
                                 </p>
                             </div>
 
@@ -892,7 +895,7 @@ const Signup = () => {
             )}
 
             {/* Footer */}
-            // <Footer />
+             {/* <Footer /> */}
         </div>
     )
 }

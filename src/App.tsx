@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Home from "./pages/Home/Home";
 import Contact from "./pages/Home/Contact/Contact";
 import About from "./pages/Home/About/AboutUs";
@@ -18,13 +19,12 @@ import NotificationsPage from "./pages/dashboard/NotificationsPage";
 import SupportPage from "./pages/dashboard/SupportPage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminHome from "./pages/admin/AdminHome";
-import AdminReports from "./pages/admin/AdminReports";
-import AdminTransactions from "./pages/admin/AdminTransactions";
 
 function App() {
+  const queryClient = new QueryClient();
   return (
-    <Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
       {/* Homepage routes */}
       <Routes>
         <Route path="/" element={<Home />} />
@@ -38,7 +38,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
       </Routes>
 
       {/* User Dashboard routes */}
@@ -57,13 +56,12 @@ function App() {
 
       {/* Admin routes */}
       <Routes>
-        <Route path="/admin" element={<AdminDashboard />}>
-          <Route index element={<AdminHome />} />
-          <Route path="reports" element={<AdminReports />} />
-          <Route path="transactions" element={<AdminTransactions />} />
-        </Route>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
-    </Router>
+      </Router>
+    </QueryClientProvider>
   );
 }
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "../../components/Dashboard/DashboardLayout";
+import { Modal } from "../../components/Modal/Modal";
+import { Loading } from "../../components/Loading/Loading";
 
 interface Plan {
   id: string;
@@ -11,14 +13,28 @@ interface Plan {
   icon: string;
 }
 
+const backendUrl = import.meta.env.VITE_API_URL;
+
 const UpgradePageContent: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPlan, setCurrentPlan] = useState<string>("");
+
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "info";
+  }>({ isOpen: false, title: "", message: "", type: "info" });
+
+  const [upgradeHistory, setUpgradeHistory] = useState<Array<any>>([]);
 
   const plans: Plan[] = [
     {
       id: "mini",
       name: "Mini",
-      price: 9.99,
+      price: 49.99,
       description: "Perfect for beginners",
       icon: "🚀",
       features: [
@@ -32,7 +48,7 @@ const UpgradePageContent: React.FC = () => {
     {
       id: "standard",
       name: "Standard",
-      price: 29.99,
+      price: 299.99,
       description: "For regular traders",
       icon: "⭐",
       features: [
@@ -48,7 +64,7 @@ const UpgradePageContent: React.FC = () => {
     {
       id: "pro",
       name: "Pro",
-      price: 79.99,
+      price: 799.99,
       description: "For professional traders",
       icon: "💎",
       features: [
@@ -65,7 +81,7 @@ const UpgradePageContent: React.FC = () => {
     {
       id: "premium",
       name: "Premium",
-      price: 199.99,
+      price: 1999.99,
       description: "For institutional traders",
       icon: "👑",
       features: [
@@ -83,10 +99,149 @@ const UpgradePageContent: React.FC = () => {
     },
   ];
 
-  const currentPlan = "standard";
+  // FETCH DATA ON MOUNT
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setIsLoading(false);
+      window.location.href = '/login';
+      return;
+    }
+
+    Promise.all([
+      fetch(`${backendUrl}/api/dashboard/portfolio`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then((r) => r.json()),
+      fetch(`${backendUrl}/api/requests/upgrades`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then((r) => r.json()),
+    ])
+      .then(([portfolio, upgrades]) => {
+        // Set current plan from portfolio
+        if (portfolio.accountLevel) {
+          setCurrentPlan(portfolio.accountLevel);
+        }
+
+        // Set upgrade history
+        if (upgrades.success && upgrades.upgrades) {
+          const sorted = upgrades.upgrades.sort(
+            (a: any, b: any) =>
+              new Date(b.requestedAt).getTime() -
+              new Date(a.requestedAt).getTime()
+          );
+          setUpgradeHistory(sorted.slice(0, 5));
+        }
+      })
+      .catch((err) => console.error("Failed to fetch data:", err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  // SUBMIT UPGRADE REQUEST
+  const handleUpgrade = async (planId: string) => {
+    // Check if already on this plan
+    if (planId === currentPlan) {
+      setModal({
+        isOpen: true,
+        title: "Already Subscribed",
+        message: `You are already on the ${plans.find((p) => p.id === planId)?.name} plan`,
+        type: "warning",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token");
+
+      const response = await fetch(`${backendUrl}/api/requests/upgrade`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          targetLevel: planId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const targetPlan = plans.find((p) => p.id === planId);
+        setModal({
+          isOpen: true,
+          title: "Upgrade Request Submitted",
+          message: `Your upgrade to ${targetPlan?.name} plan has been submitted and is awaiting admin approval. You'll be notified once it's approved.`,
+          type: "success",
+        });
+
+        // Refresh upgrade history
+        setTimeout(() => {
+          const token = localStorage.getItem("token");
+          fetch(`${backendUrl}/api/requests/upgrades`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.success && d.upgrades) {
+                const sorted = d.upgrades.sort(
+                  (a: any, b: any) =>
+                    new Date(b.requestedAt).getTime() -
+                    new Date(a.requestedAt).getTime()
+                );
+                setUpgradeHistory(sorted.slice(0, 5));
+              }
+            });
+        }, 1000);
+      } else {
+        setModal({
+          isOpen: true,
+          title: "Upgrade Failed",
+          message: data.message || "Failed to submit upgrade request",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "Failed to submit upgrade request",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
+    return <Loading isLoading={true} message="Loading upgrade options..." />;
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-yellow-100 text-yellow-800";
+    }
+  };
 
   return (
     <div className="space-y-6">
+      <Loading isLoading={isSubmitting} message="Processing upgrade..." />
+      <Modal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+      />
+
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Upgrade Your Account</h1>
@@ -96,7 +251,16 @@ const UpgradePageContent: React.FC = () => {
       {/* Current Plan Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-900">
-          <span className="font-bold">Current Plan:</span> Standard Plan - $29.99/month
+          <span className="font-bold">Current Plan:</span>{" "}
+          {plans.find((p) => p.id === currentPlan)?.name || "Free"} -
+          {currentPlan ? (
+            <>
+              $
+              {plans.find((p) => p.id === currentPlan)?.price}/month
+            </>
+          ) : (
+            " No active plan"
+          )}
         </p>
       </div>
 
@@ -105,13 +269,10 @@ const UpgradePageContent: React.FC = () => {
         {plans.map((plan) => (
           <div
             key={plan.id}
-            onClick={() => setSelectedPlan(plan.id)}
-            className={`rounded-lg border-2 overflow-hidden transition-all cursor-pointer relative ${
+            className={`rounded-lg border-2 overflow-hidden transition-all relative ${
               plan.id === currentPlan
                 ? "border-green-500 bg-green-50"
-                : selectedPlan === plan.id
-                  ? "border-blue-600 shadow-lg"
-                  : "border-gray-200 hover:border-gray-300"
+                : "border-gray-200 hover:border-gray-300"
             }`}
           >
             {/* Popular Badge */}
@@ -132,8 +293,12 @@ const UpgradePageContent: React.FC = () => {
               {/* Icon and Name */}
               <div className="mb-4">
                 <span className="text-4xl mb-2 block">{plan.icon}</span>
-                <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
-                <p className="text-sm text-gray-600 mt-2">{plan.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {plan.name}
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  {plan.description}
+                </p>
               </div>
 
               {/* Price */}
@@ -147,7 +312,10 @@ const UpgradePageContent: React.FC = () => {
               {/* Features */}
               <ul className="space-y-3 mb-6">
                 {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                  <li
+                    key={idx}
+                    className="flex items-start gap-2 text-sm text-gray-700"
+                  >
                     <span className="text-green-600 font-bold">✓</span>
                     <span>{feature}</span>
                   </li>
@@ -160,8 +328,12 @@ const UpgradePageContent: React.FC = () => {
                   Current Plan
                 </button>
               ) : (
-                <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                  Upgrade to {plan.name}
+                <button
+                  onClick={() => handleUpgrade(plan.id)}
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Processing..." : `Upgrade to ${plan.name}`}
                 </button>
               )}
             </div>
@@ -169,9 +341,55 @@ const UpgradePageContent: React.FC = () => {
         ))}
       </div>
 
+      {/* Upgrade History */}
+      {upgradeHistory.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Upgrade History
+          </h2>
+          <div className="space-y-3">
+            {upgradeHistory.map((upgrade) => (
+              <div
+                key={upgrade._id}
+                className="p-4 border border-gray-200 rounded-lg"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      Upgrade to {plans.find((p) => p.id === upgrade.targetLevel)?.name}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      ${plans.find((p) => p.id === upgrade.targetLevel)?.price}/month
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                      upgrade.status
+                    )}`}
+                  >
+                    {upgrade.status.charAt(0).toUpperCase() +
+                      upgrade.status.slice(1)}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {new Date(upgrade.requestedAt).toLocaleDateString()}
+                </p>
+                {upgrade.adminNotes && (
+                  <p className="text-xs text-gray-600 mt-2 p-2 bg-gray-50 rounded">
+                    {upgrade.adminNotes}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* FAQ Section */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">
+          Frequently Asked Questions
+        </h2>
         <div className="space-y-4">
           {[
             {
@@ -191,7 +409,10 @@ const UpgradePageContent: React.FC = () => {
               a: "You'll get a prorated refund for the unused portion of your current billing cycle.",
             },
           ].map((faq, idx) => (
-            <div key={idx} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
+            <div
+              key={idx}
+              className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
+            >
               <p className="font-medium text-gray-900 mb-2">{faq.q}</p>
               <p className="text-sm text-gray-600">{faq.a}</p>
             </div>
@@ -202,7 +423,9 @@ const UpgradePageContent: React.FC = () => {
       {/* Contact Sales */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">Need Custom Plan?</h2>
-        <p className="mb-4">Contact our sales team for enterprise solutions and custom pricing</p>
+        <p className="mb-4">
+          Contact our sales team for enterprise solutions and custom pricing
+        </p>
         <button className="px-6 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100 transition-colors">
           Get in Touch
         </button>
@@ -216,9 +439,12 @@ export const UpgradePage: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    };
 
-    fetch('http://localhost:4000/api/dashboard/user', { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch(`${backendUrl}/api/dashboard/user`, { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => {
         if (d) {

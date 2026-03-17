@@ -29,3 +29,6 @@ export async function closeMongo() {
     client = null;
     db = null;
 }
+
+
+export default db;

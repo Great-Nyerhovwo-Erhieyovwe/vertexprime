@@ -55,6 +55,57 @@
       "balanceUsd": 156200.75,
       "roi": 25.8,
       "_id": "69965346ac7325e0ad6dc26c"
+    },
+    {
+      "email": "dewittlehner256@gmail.com",
+      "password": "$2b$10$VWYlyPFnHHCNeOGnvj/Oy.JJ/U6S/h1r8q7uA3X1MdPTNt4MQ8Zoi",
+      "firstName": "Dewitt",
+      "lastName": "Lehner",
+      "username": "dewittlehner256",
+      "country": "Germany",
+      "currency": "EUR",
+      "accountType": "corporate",
+      "dateOfBirth": "1988-11-06",
+      "role": "trader",
+      "emailVerified": true,
+      "createdAt": "2026-02-19T20:55:45.891Z",
+      "balanceUsd": 1000,
+      "roi": 89.6,
+      "_id": "699778d2ee475c405fa1ed0d"
+    },
+    {
+      "email": "mark@gmail.com",
+      "password": "$2b$10$APbap5Ar1jfYEBkvc.6ZhujOLL5TrdYTjOjplNsQefhiwbOiV7ZB2",
+      "firstName": "Mark",
+      "lastName": "Jeff",
+      "username": "mark199",
+      "country": "United States",
+      "currency": "USD",
+      "accountType": "corporate",
+      "dateOfBirth": "1987-09-11",
+      "role": "trader",
+      "emailVerified": true,
+      "createdAt": "2026-02-24T20:30:34.189Z",
+      "balanceUsd": 0,
+      "roi": 0,
+      "_id": "1771965034191"
+    },
+    {
+      "email": "johndoe101@gmail.com",
+      "password": "$2b$10$8ByKIn2Itxddrf3Z.zYZhOoQvxpSQb.NwAhqbcCOfMNKPQYfO5Cwi",
+      "firstName": "John",
+      "lastName": "Doe",
+      "username": "johndoe101",
+      "country": "United Kingdom",
+      "currency": "GBP",
+      "accountType": "individual",
+      "dateOfBirth": "1989-04-06",
+      "role": "trader",
+      "emailVerified": true,
+      "createdAt": "2026-03-05T12:31:05.954Z",
+      "balanceUsd": 0,
+      "roi": 0,
+      "_id": "1772713865955"
     }
   ],
   "portfolios": [
@@ -263,6 +314,24 @@
       "totalProfit": 5890,
       "winRate": 68.2,
       "updatedAt": "2026-02-19T12:00:00Z"
+    }
+  ],
+  "deposits": [],
+  "withdrawals": [],
+  "trades": [],
+  "upgrades": [],
+  "verifications": [],
+  "settings": [],
+  "messages": [
+    {
+      "userId": "699778d2ee475c405fa1ed0d",
+      "message": "your account is due for upgrade",
+      "type": "direct",
+      "from": "admin",
+      "fromEmail": "vertexprimecapitals@gmail.com",
+      "sentAt": "2026-02-23T03:21:30.790Z",
+      "read": false,
+      "_id": "699bc7bb1bb7eaac2b3c08ca"
     }
   ]
 }

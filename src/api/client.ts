@@ -22,7 +22,12 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/";
+      // keep admin in admin login if token invalid
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/admin/login';
+      } else {
+        window.location.href = "/";
+      }
     }
     return Promise.reject(error);
   }

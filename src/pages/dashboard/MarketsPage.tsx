@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "../../components/Dashboard/DashboardLayout";
 
+const backendUrl = import.meta.env.VITE_API_URL;
+
 const MarketsPageContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -8,7 +10,7 @@ const MarketsPageContent: React.FC = () => {
   const [markets, setMarkets] = useState<Array<any>>([]);
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/market')
+    fetch(`${backendUrl}/api/market`)
       .then((r) => r.json())
       .then((d) => setMarkets(d.markets || []))
       .catch(() => setMarkets([]));
@@ -162,9 +164,12 @@ export const MarketsPage: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      window.location.href = '/login'
+      return;
+    }
 
-    fetch('http://localhost:4000/api/dashboard/user', { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch(`${backendUrl}/api/dashboard/user`, { headers: { 'Authorization': `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => setUser({
         name: `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'User',
