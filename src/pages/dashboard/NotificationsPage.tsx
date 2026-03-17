@@ -18,6 +18,9 @@ const NotificationsPageContent: React.FC = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  console.log(userProfile);
+  console.log(loading);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {

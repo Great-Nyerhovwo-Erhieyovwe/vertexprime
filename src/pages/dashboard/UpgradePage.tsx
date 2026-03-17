@@ -16,7 +16,7 @@ interface Plan {
 const backendUrl = import.meta.env.VITE_API_URL;
 
 const UpgradePageContent: React.FC = () => {
-  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  // const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState<string>("");

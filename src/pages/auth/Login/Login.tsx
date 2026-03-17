@@ -18,6 +18,8 @@ const Login = () => {
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
     const [chartBars, setChartBars] = useState(Array(30).fill(0).map(() => Math.random() * 80 + 20))
 
+    console.log(chartBars);
+
     // Form validation
     const validateForm = () => {
         const newErrors: { email?: string; password?: string } = {}

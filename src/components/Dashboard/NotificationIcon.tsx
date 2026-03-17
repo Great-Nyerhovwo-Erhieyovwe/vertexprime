@@ -21,6 +21,8 @@ const typeColors = {
   warning: "bg-yellow-500",
 };
 
+console.log(typeColors);
+
 const typeIcons = {
   alert: "⚠️",
   info: "ℹ️",

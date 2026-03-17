@@ -37,6 +37,8 @@ import { connectMongo, getDb } from './utils/db.js'; // MongoDB utilities
 import { provider } from './services/dataProvider.js'; // Data provider (MongoDB/JSON)
 import jwt from 'jsonwebtoken';             // JWT token handling (optional, for reference)
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 // ============================================
 // INITIALIZE EXPRESS APP
@@ -97,6 +99,18 @@ app.use((err, _req, res, _next) => {
     res.status(500).json({ message: 'Internal server error' });
 });
 
+
+// ===========================================
+// Build setup for ES Modules (if needed)
+// ===========================================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+app.use(express.static(path.join(__dirname, 'dist'))); // Serve static files from 'dist' directory
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html')); // Serve index.html for all routes (SPA)
+});
+
 // ============================================
 // DATABASE CONNECTION & SERVER STARTUP
 // ============================================
@@ -138,6 +152,7 @@ async function start() {
         console.log('⚠️  No MongoDB URI provided in .env');
         console.log('📁 Using fallback data store: db.json file');
     }
+
 
     // ============================================
     // Start Express Server
