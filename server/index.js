@@ -54,7 +54,7 @@ const PORT = process.env.PORT || 4000;
 const FRONTEND_ORIGIN = 
     process.env.FRONTEND_ORIGIN || 
     process.env.VITE_FRONTEND_ORIGIN || 
-    'vertexprime.onrender.com';
+    'https://vertexprime.onrender.com';
 
 // Configure CORS to allow requests from frontend
 // credentials: true allows cookies to be sent with requests
