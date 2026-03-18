@@ -89,27 +89,32 @@ app.use('/api', routes);
 //     res.sendFile(path.join(__dirname, 'index.html'));
 // })
 
+// ===========================================
+// Build setup for ES Modules
+// ===========================================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 // ============================================
-// GLOBAL ERROR HANDLER
+// SERVE FRONTEND (React build in /dist)
 // ============================================
-// Catches any unhandled errors in route handlers
-// Returns JSON error response instead of crash
+
+// 1. Serve static files (JS, CSS, images)
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// 2. SPA fallback (VERY IMPORTANT FIX)
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+// ============================================
+// GLOBAL ERROR HANDLER (MUST BE LAST)
+// ============================================
 app.use((err, _req, res, _next) => {
     console.error('Unhandled error:', err);
     res.status(500).json({ message: 'Internal server error' });
 });
 
-
-// ===========================================
-// Build setup for ES Modules (if needed)
-// ===========================================
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-app.use(express.static(path.join(__dirname, 'dist'))); // Serve static files from 'dist' directory
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html')); // Serve index.html for all routes (SPA)
-});
 
 // ============================================
 // DATABASE CONNECTION & SERVER STARTUP
