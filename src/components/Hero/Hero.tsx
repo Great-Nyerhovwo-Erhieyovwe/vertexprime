@@ -120,60 +120,42 @@ export const Hero = () => {
                 </motion.div>
 
                 {/* Key Features with enhanced animations */}
-                <motion.div
-                    className="mb-12 sm:mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.8 }}
-                >
-                    <motion.div
-                        className="text-center group px-4 sm:px-2"
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                    >
-                        <motion.div
-                            className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300"
-                            animate={{ rotate: [0, 5, -5, 0] }}
-                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                        >
-                            ⚡
-                        </motion.div>
-                        <h3 className="text-lg sm:text-xl font-bold text-accent mb-2 sm:mb-3">Fast Execution</h3>
-                        <p className="text-sm sm:text-base text-white/80 leading-relaxed">Execute trades in milliseconds with our advanced infrastructure and zero-latency technology.</p>
-                    </motion.div>
-                    <motion.div
-                        className="text-center group px-4 sm:px-2"
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                    >
-                        <motion.div
-                            className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300"
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                        >
-                            {/* <FaLock/> */}
-                            🔒
-                        </motion.div>
-                        <h3 className="text-lg sm:text-xl font-bold text-accent mb-2 sm:mb-3">Secure Funds</h3>
-                        <p className="text-sm sm:text-base text-white/80 leading-relaxed">Your assets are protected with military-grade encryption and fully segregated accounts.</p>
-                    </motion.div>
-                    <motion.div
-                        className="text-center group px-4 sm:px-2"
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                    >
-                        <motion.div
-                            className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300"
-                            animate={{ y: [0, -3, 0] }}
-                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            {/* <FaChart/> */}
-                            📊
-                        </motion.div>
-                        <h3 className="text-lg sm:text-xl font-bold text-accent mb-2 sm:mb-3">Pro Tools</h3>
-                        <p className="text-sm sm:text-base text-white/80 leading-relaxed">Access advanced charting, real-time data, and AI-powered analysis tools.</p>
-                    </motion.div>
-                </motion.div>
+<motion.div
+    className="mb-12 sm:mb-16 flex flex-col gap-4 sm:gap-6 px-4"
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.6, duration: 0.8 }}
+>
+    {[ 
+        { icon: "⚡", title: "Fast Execution", desc: "Execute trades in milliseconds with our advanced infrastructure and zero-latency technology." },
+        { icon: "🔒", title: "Secure Funds", desc: "Your assets are protected with military-grade encryption and fully segregated accounts." },
+        { icon: "📊", title: "Pro Tools", desc: "Access advanced charting, real-time data, and AI-powered analysis tools." }
+    ].map((item, i) => (
+        <motion.div
+            key={i}
+            className="flex items-center gap-4 sm:gap-5 bg-white/5 rounded-xl p-4 sm:p-5 group"
+            whileHover={{ scale: 1.03 }}
+            transition={{ type: "spring", stiffness: 300 }}
+        >
+            <motion.div
+                className="text-3xl sm:text-4xl flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
+                animate={{ rotate: i === 0 ? [0, 5, -5, 0] : undefined }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+                {item.icon}
+            </motion.div>
+
+            <div>
+                <h3 className="text-base sm:text-lg font-bold text-accent mb-1">
+                    {item.title}
+                </h3>
+                <p className="text-sm sm:text-base text-white/80 leading-relaxed">
+                    {item.desc}
+                </p>
+            </div>
+        </motion.div>
+    ))}
+</motion.div>
 
                 {/* Animated counters with enhanced styling */}
                 <motion.div
