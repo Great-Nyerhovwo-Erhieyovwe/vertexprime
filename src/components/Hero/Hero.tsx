@@ -177,7 +177,7 @@ export const Hero = () => {
 
                 {/* Animated counters with enhanced styling */}
                 <motion.div
-                    className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-12 xl:gap-16 w-full max-w-4xl mx-auto px-2"
+                    className="flex flex-col sm:flex-col justify-center items-center gap-4 sm:gap-6 md:gap-8 lg:gap-12 xl:gap-16 w-full max-w-4xl mx-auto px-2"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8 }}
