@@ -96,7 +96,7 @@ const displayUser = user
     <DashboardLayout notifications={transformedNotifications} user={displayUser} onLogout={handleLogout}>
       {/* Welcome Section */}
 <div className="mb-6 sm:mb-8">
-  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+  <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap">
     
     {/* 🔴 Original */}
     {/* <h1 className="text-2xl sm:text-3xl font-bold text-gray-900"> */}
