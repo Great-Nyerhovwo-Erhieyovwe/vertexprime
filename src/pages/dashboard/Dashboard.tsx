@@ -24,7 +24,15 @@ const displayUser = user
       isVerified: user.emailVerified || false,
     }
   : { name: "Loading...", email: "", isVerified: false };
-  
+
+
+  const getGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+};
 
   const displayMetrics = stats
     ? {
@@ -91,7 +99,7 @@ const displayUser = user
       {/* Welcome Section */}
       <div className="mb-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome back, {displayUser.name}!</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{getGreeting()}, {displayUser.name}!</h1>
           {displayUser.isVerified && (
             <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500 rounded-full" title="Account Verified">
               <svg
