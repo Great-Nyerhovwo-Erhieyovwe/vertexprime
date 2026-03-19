@@ -18,6 +18,7 @@ const DepositPageContent: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [availableBalance, setAvailableBalance] = useState<number>(0);
+const [agreed, setAgreed] = useState(false);
 
   // Modal state for feedback
   const [modal, setModal] = useState<{
@@ -132,6 +133,16 @@ const DepositPageContent: React.FC = () => {
       });
       return;
     }
+
+if (!agreed) {
+  setModal({
+    isOpen: true,
+    title: "Terms Required",
+    message: "You must agree to the terms and conditions before proceeding.",
+    type: "error",
+  });
+  return;
+}
 
     setIsSubmitting(true);
 
@@ -382,7 +393,13 @@ const DepositPageContent: React.FC = () => {
 
           {/* Terms Agreement */}
           <div className="flex items-start gap-3">
-            <input type="checkbox" id="terms" className="mt-1" />
+            <input
+  type="checkbox"
+  id="terms"
+  className="mt-1"
+  checked={agreed}
+  onChange={(e) => setAgreed(e.target.checked)}
+/>
             <label htmlFor="terms" className="text-sm text-gray-600">
               I agree to the terms and conditions and understand that my deposit
               will be processed after admin approval
