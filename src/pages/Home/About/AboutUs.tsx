@@ -209,7 +209,7 @@ const AboutUs = () => {
                     <motion.div className="relative space-y-12" variants={staggerContainer} initial="initial" animate="animate">
 
                         {/* Vertical center line */}
-                        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-600 translate-x-1/2"></div> /* error attached will fix later */
+                        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-600 translate-x-1/2"></div>
 
                         {milestones.map((milestone, index) => (
                             <motion.div
