@@ -16,14 +16,12 @@ export const Dashboard: React.FC = () => {
 
   // Prepare data for display
 const displayUser = user
-  ? {
-      name: user.username 
-        || `${user.firstName || ""} ${user.lastName || ""}`.trim() 
-        || "User",
-      email: user.email || "",
-      isVerified: user.emailVerified || false,
-    }
-  : { name: "Loading...", email: "", isVerified: false };
+    ? {
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+        email: user.email || "",
+        isVerified: user.emailVerified || false,
+      }
+    : { name: "Loading...", email: "", isVerified: false };
 
 
   const getGreeting = () => {
