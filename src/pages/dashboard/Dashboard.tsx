@@ -97,25 +97,37 @@ const displayUser = user
   return (
     <DashboardLayout notifications={transformedNotifications} user={displayUser} onLogout={handleLogout}>
       {/* Welcome Section */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{getGreeting()}, {displayUser.name}!</h1>
-          {displayUser.isVerified && (
-            <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500 rounded-full" title="Account Verified">
-              <svg
-                className="w-4 h-4 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </span>
-          )}
-        </div>
+<div className="mb-6 sm:mb-8">
+  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+    
+    {/* 🔴 Original */}
+    {/* <h1 className="text-2xl sm:text-3xl font-bold text-gray-900"> */}
+
+    {/* 🟢 Changed → smaller on mobile */}
+    <h1 className="text-lg sm:text-3xl font-bold text-gray-900 whitespace-nowrap">
+      {getGreeting()}, {displayUser.name}!
+    </h1>
+
+    {displayUser.isVerified && (
+      <span
+        className="inline-flex items-center justify-center w-6 h-6 bg-blue-500 rounded-full flex-shrink-0"
+        title="Account Verified"
+      >
+        <svg
+          className="w-4 h-4 text-white"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fillRule="evenodd"
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </span>
+    )}
+  </div>
+</div>
         <p className="text-sm sm:text-base text-gray-600 mt-2">Here's your account overview and recent activity</p>
       </div>
 
