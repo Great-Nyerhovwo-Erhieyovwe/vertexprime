@@ -382,11 +382,27 @@ if (!agreed) {
                 <code className="flex-1 p-2 bg-white border border-gray-300 rounded font-mono text-xs text-gray-900">
                   THQYgNzTYo7g5aBhhJLMc2FaA632FwZ4WK
                 </code>
-                <button className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="MB 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                  </svg>
-                </button>
+                <button
+  type="button"
+  onClick={() => {
+    navigator.clipboard.writeText("THQYgNzTYo7g5aBhhJLMc2FaA632FwZ4WK");
+  }}
+  className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+>
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M16 6H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v8a2 2 0 002 2z"
+    />
+  </svg>
+</button>
               </div>
             </div>
           )}
