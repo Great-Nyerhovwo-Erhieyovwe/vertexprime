@@ -125,7 +125,6 @@ const displayUser = user
       </span>
     )}
   </div>
-</div>
         <p className="text-sm sm:text-base text-gray-600 mt-2">Here's your account overview and recent activity</p>
       </div>
 
