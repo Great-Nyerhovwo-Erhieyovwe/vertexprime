@@ -91,6 +91,9 @@ interface DashboardStats {
   lastTransactionDate: string | null;
 }
 
+const backendUrl =
+  import.meta.env.VITE_API_URL || "http://localhost:4000";
+
 /**
  * useDashboard Hook
  * 
@@ -151,7 +154,7 @@ export function useDashboard() {
    */
   const fetchUser = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:4000/api/dashboard/user', {
+      const response = await fetch(`${backendUrl}/api/dashboard/user`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -178,7 +181,7 @@ export function useDashboard() {
    */
   const fetchPortfolio = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:4000/api/dashboard/portfolio', {
+      const response = await fetch(`${backendUrl}/api/dashboard/portfolio`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -206,7 +209,7 @@ export function useDashboard() {
   const fetchTransactions = async (token: string, limit = 50, offset = 0) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/dashboard/transactions?limit=${limit}&offset=${offset}`,
+        `${backendUrl}/api/dashboard/transactions?limit=${limit}&offset=${offset}`,
         {
           method: 'GET',
           headers: {
@@ -236,7 +239,7 @@ export function useDashboard() {
   const fetchNotifications = async (token: string, unreadOnly = false) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/dashboard/notifications?unreadOnly=${unreadOnly}`,
+        `${backendUrl}/api/dashboard/notifications?unreadOnly=${unreadOnly}`,
         {
           method: 'GET',
           headers: {
@@ -265,7 +268,7 @@ export function useDashboard() {
    */
   const fetchStats = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:4000/api/dashboard/stats', {
+      const response = await fetch(`${backendUrl}/api/dashboard/stats`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -307,6 +310,7 @@ export function useDashboard() {
           // User not logged in, redirect to login page
           setError('No authentication token found');
           setLoading(false);
+window.location.href = "/login";
           return;
         }
 
